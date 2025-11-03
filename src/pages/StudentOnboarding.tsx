@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
 
 const INTEREST_OPTIONS = [
@@ -89,14 +90,34 @@ const StudentOnboarding = () => {
       return;
     }
 
-    // TODO: Connect to Lovable Cloud / Supabase
-    console.log("Form submitted:", formData);
-    toast.success("Profile created! Finding your perfect mentor...");
-    
-    // Simulate API call
-    setTimeout(() => {
-      navigate(`/match?name=${formData.firstName}`);
-    }, 1500);
+    try {
+      const { data, error } = await supabase
+        .from("students")
+        .insert({
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email,
+          grade: parseInt(formData.grade),
+          school: formData.school || null,
+          city: formData.city || null,
+          languages: formData.languages,
+          interests: formData.interests,
+          goals: formData.goals || null,
+          meeting_pref: formData.meetingPref,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast.success("Profile created! Finding your perfect mentor...");
+      setTimeout(() => {
+        navigate(`/match?studentId=${data.id}&name=${formData.firstName}`);
+      }, 1500);
+    } catch (error: any) {
+      console.error("Error creating student profile:", error);
+      toast.error(error.message || "Failed to create profile. Please try again.");
+    }
   };
 
   const progress = (step / 3) * 100;

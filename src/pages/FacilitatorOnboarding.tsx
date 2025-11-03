@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
 
 const FacilitatorOnboarding = () => {
@@ -23,14 +24,32 @@ const FacilitatorOnboarding = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.name || !formData.email || !formData.org) {
       toast.error("Please fill in all required fields");
       return;
     }
 
-    console.log("Facilitator form submitted:", formData);
-    toast.success("Thank you! We'll contact you soon with access details.");
+    try {
+      const { error } = await supabase
+        .from("facilitators")
+        .insert({
+          name: formData.name,
+          email: formData.email,
+          org: formData.org,
+          role: formData.role || null,
+          city: formData.city || null,
+          max_matches: parseInt(formData.maxMatches),
+          notes: formData.notes || null,
+        });
+
+      if (error) throw error;
+
+      toast.success("Thank you! We'll contact you soon with access details.");
+    } catch (error: any) {
+      console.error("Error creating facilitator profile:", error);
+      toast.error(error.message || "Failed to create profile. Please try again.");
+    }
   };
 
   return (

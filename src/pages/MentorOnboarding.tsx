@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowRight, ArrowLeft, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
 
 const SKILL_OPTIONS = [
@@ -60,7 +61,7 @@ const MentorOnboarding = () => {
     }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.firstName || !formData.lastName || !formData.email) {
       toast.error("Please fill in all required fields");
       return;
@@ -71,8 +72,30 @@ const MentorOnboarding = () => {
       return;
     }
 
-    console.log("Mentor form submitted:", formData);
-    toast.success("Thank you! Your mentor profile has been created. We'll be in touch soon!");
+    try {
+      const { error } = await supabase
+        .from("mentors")
+        .insert({
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email,
+          employer: formData.employer || null,
+          role: formData.role || null,
+          bio: formData.bio || null,
+          skills: formData.skills,
+          languages: formData.languages,
+          age_pref: formData.agePref,
+          meeting_pref: formData.meetingPref,
+          max_students: parseInt(formData.maxStudents),
+        });
+
+      if (error) throw error;
+
+      toast.success("Thank you! Your mentor profile has been created. We'll be in touch soon!");
+    } catch (error: any) {
+      console.error("Error creating mentor profile:", error);
+      toast.error(error.message || "Failed to create profile. Please try again.");
+    }
   };
 
   return (

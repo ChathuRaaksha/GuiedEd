@@ -1,56 +1,81 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Mail, Sparkles, Users, CheckCircle } from "lucide-react";
+import { ArrowLeft, Mail, Sparkles, Users, CheckCircle, Loader2 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { calculateMatch, ScoredMatch } from "@/utils/matchingAlgorithm";
 import logo from "@/assets/logo.png";
-
-// Mock mentor data - will be replaced with real data from Lovable Cloud
-const MOCK_MENTORS = [
-  {
-    id: "1",
-    firstName: "Sarah",
-    lastName: "Chen",
-    role: "Software Engineer",
-    employer: "Tech Corp",
-    bio: "Passionate about helping students discover tech careers",
-    skills: ["💻 Technology", "🎨 Art & Design"],
-    languages: ["English", "Mandarin"],
-    score: 92,
-    reasons: ["3 shared interests", "Common language", "Available next week"],
-  },
-  {
-    id: "2",
-    firstName: "Marcus",
-    lastName: "Johnson",
-    role: "Product Designer",
-    employer: "Design Studio",
-    bio: "Former student mentor, loves creative problem solving",
-    skills: ["🎨 Art & Design", "💼 Business"],
-    languages: ["English", "Spanish"],
-    score: 88,
-    reasons: ["2 shared interests", "Design expertise", "Flexible schedule"],
-  },
-  {
-    id: "3",
-    firstName: "Amira",
-    lastName: "Hassan",
-    role: "Healthcare Professional",
-    employer: "City Hospital",
-    bio: "Dedicated to inspiring future healthcare workers",
-    skills: ["🏥 Healthcare", "🔬 Science"],
-    languages: ["English", "Arabic"],
-    score: 85,
-    reasons: ["Healthcare interest match", "Mentored 5+ students", "Patient teaching experience"],
-  },
-];
 
 const Match = () => {
   const [searchParams] = useSearchParams();
+  const studentId = searchParams.get("studentId");
   const studentName = searchParams.get("name") || "there";
+  const [matches, setMatches] = useState<ScoredMatch[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleSendInvite = (mentorName: string) => {
-    toast.success(`Invite sent to ${mentorName}! A facilitator will review and connect you soon.`);
+  useEffect(() => {
+    async function loadMatches() {
+      if (!studentId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Fetch student data
+        const { data: student, error: studentError } = await supabase
+          .from("students")
+          .select("*")
+          .eq("id", studentId)
+          .single();
+
+        if (studentError) throw studentError;
+
+        // Fetch all mentors
+        const { data: mentors, error: mentorsError } = await supabase
+          .from("mentors")
+          .select("*");
+
+        if (mentorsError) throw mentorsError;
+
+        // Calculate matches
+        const scoredMatches = calculateMatch(student, mentors || []);
+        setMatches(scoredMatches.slice(0, 5)); // Top 5 matches
+      } catch (error: any) {
+        console.error("Error loading matches:", error);
+        toast.error("Failed to load matches. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadMatches();
+  }, [studentId]);
+
+  const handleSendInvite = async (mentorId: string, mentorName: string, score: number, reasons: string[]) => {
+    if (!studentId) {
+      toast.error("Student ID not found");
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("invites")
+        .insert({
+          student_id: studentId,
+          mentor_id: mentorId,
+          score,
+          reasons,
+        });
+
+      if (error) throw error;
+
+      toast.success(`Invite sent to ${mentorName}! A facilitator will review and connect you soon.`);
+    } catch (error: any) {
+      console.error("Error sending invite:", error);
+      toast.error("Failed to send invite. Please try again.");
+    }
   };
 
   return (
@@ -71,22 +96,38 @@ const Match = () => {
             </Link>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-accent" />
+                {loading ? (
+                  <Loader2 className="w-6 h-6 text-accent animate-spin" />
+                ) : (
+                  <Sparkles className="w-6 h-6 text-accent" />
+                )}
               </div>
               <div>
-                <h1 className="text-3xl font-bold">
-                  Great news, {studentName}! 🎉
-                </h1>
-                <p className="text-muted-foreground">
-                  I found {MOCK_MENTORS.length} amazing mentors who match your profile
-                </p>
+                {loading ? (
+                  <>
+                    <h1 className="text-3xl font-bold">Finding your perfect mentors...</h1>
+                    <p className="text-muted-foreground">Ed is analyzing your profile</p>
+                  </>
+                ) : (
+                  <>
+                    <h1 className="text-3xl font-bold">
+                      {matches.length > 0 ? `Great news, ${studentName}! 🎉` : `Hi ${studentName}!`}
+                    </h1>
+                    <p className="text-muted-foreground">
+                      {matches.length > 0 
+                        ? `I found ${matches.length} amazing mentor${matches.length > 1 ? 's' : ''} who match your profile`
+                        : "Try adding more interests to find better matches"}
+                    </p>
+                  </>
+                )}
               </div>
             </div>
           </div>
 
           {/* Match Cards */}
-          <div className="space-y-6">
-            {MOCK_MENTORS.map((mentor) => (
+          {!loading && matches.length > 0 && (
+            <div className="space-y-6">
+              {matches.map(({ mentor, score, reasons }) => (
               <Card key={mentor.id} className="p-6 card-hover">
                 <div className="flex flex-col md:flex-row gap-6">
                   {/* Avatar */}
@@ -101,15 +142,15 @@ const Match = () => {
                     <div className="flex items-start justify-between mb-3">
                       <div>
                         <h3 className="text-xl font-bold">
-                          {mentor.firstName} {mentor.lastName}
+                          {mentor.first_name} {mentor.last_name}
                         </h3>
                         <p className="text-muted-foreground">
-                          {mentor.role} at {mentor.employer}
+                          {mentor.role} {mentor.employer ? `at ${mentor.employer}` : ''}
                         </p>
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold text-primary">
-                          {mentor.score}%
+                          {score}%
                         </div>
                         <div className="text-xs text-muted-foreground">
                           Match Score
@@ -118,7 +159,7 @@ const Match = () => {
                     </div>
 
                     <p className="text-sm text-muted-foreground mb-4">
-                      {mentor.bio}
+                      {mentor.bio || "Excited to mentor students!"}
                     </p>
 
                     {/* Skills */}
@@ -141,7 +182,7 @@ const Match = () => {
                     <div className="mb-4">
                       <div className="text-sm font-medium mb-2">Why this is a great match:</div>
                       <div className="space-y-1">
-                        {mentor.reasons.map((reason, idx) => (
+                        {reasons.map((reason, idx) => (
                           <div key={idx} className="flex items-center gap-2 text-sm text-muted-foreground">
                             <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
                             {reason}
@@ -153,7 +194,7 @@ const Match = () => {
                     {/* Action Buttons */}
                     <div className="flex gap-3">
                       <Button
-                        onClick={() => handleSendInvite(`${mentor.firstName} ${mentor.lastName}`)}
+                        onClick={() => handleSendInvite(mentor.id, `${mentor.first_name} ${mentor.last_name}`, score, reasons)}
                         className="btn-primary"
                       >
                         <Mail className="w-4 h-4 mr-2" />
@@ -166,8 +207,9 @@ const Match = () => {
                   </div>
                 </div>
               </Card>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           {/* Next Steps */}
           <Card className="mt-8 p-6 bg-accent/5 border-accent/20">
