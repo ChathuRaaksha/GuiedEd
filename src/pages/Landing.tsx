@@ -96,26 +96,28 @@ const Landing = () => {
       {/* About Ed */}
       <section className="container mx-auto px-4 py-20">
         <div className="max-w-4xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center gap-12">
-            <div className="flex-1">
-              <div className="inline-block mb-4">
-                <span className="tag-chip">👋 Meet Ed</span>
+          <div className="bg-pink-100 rounded-3xl p-8 md:p-12">
+            <div className="flex flex-col md:flex-row items-center gap-12">
+              <div className="flex-1">
+                <div className="inline-block mb-4">
+                  <span className="tag-chip bg-white/80">👋 Meet Ed</span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold mb-6 text-gray-900">
+                  Your friendly AI mentor matchmaker
+                </h2>
+                <p className="text-lg text-gray-700 mb-4">
+                  Ed is here to make finding the perfect mentor fun and easy. I analyze your interests, 
+                  goals, and preferences to connect you with mentors who can truly help you grow.
+                </p>
+                <p className="text-lg text-gray-700">
+                  Think of me as your personal guide. I am always learning and improving to make 
+                  better matches every day!
+                </p>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                Your friendly AI mentor matchmaker
-              </h2>
-              <p className="text-lg text-muted-foreground mb-4">
-                Ed is here to make finding the perfect mentor fun and easy. I analyze your interests, 
-                goals, and preferences to connect you with mentors who can truly help you grow.
-              </p>
-              <p className="text-lg text-muted-foreground">
-                Think of me as your personal guide. I am always learning and improving to make 
-                better matches every day!
-              </p>
-            </div>
-            <div className="flex-1 flex justify-center">
-              <div className="w-64 h-64 bg-primary/10 rounded-3xl flex items-center justify-center">
-                <img src={edIcon} alt="Ed" className="h-32" />
+              <div className="flex-1 flex justify-center">
+                <div className="w-64 h-64 bg-white rounded-3xl flex items-center justify-center shadow-lg">
+                  <img src={edIcon} alt="Ed" className="h-32" />
+                </div>
               </div>
             </div>
           </div>
