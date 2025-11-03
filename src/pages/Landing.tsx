@@ -9,6 +9,9 @@ const Landing = () => {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <img src={logo} alt="GuidEd" className="h-10" />
           <nav className="hidden md:flex items-center gap-6">
+            <Link to="/onboarding/student" className="text-sm font-medium hover:text-primary transition-colors">
+              Start as Student
+            </Link>
             <Link to="/onboarding/mentor" className="text-sm font-medium hover:text-primary transition-colors">
               Become a Mentor
             </Link>
@@ -25,7 +28,7 @@ const Landing = () => {
           <div className="inline-block mb-6">
             <span className="tag-chip bg-accent/10 text-accent">
               <Sparkles className="w-4 h-4" />
-              AI-Powered Mentorship
+              AI Powered Mentorship
             </span>
           </div>
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
@@ -105,13 +108,13 @@ const Landing = () => {
                 goals, and preferences to connect you with mentors who can truly help you grow.
               </p>
               <p className="text-lg text-muted-foreground">
-                Think of me as your personal guide - I'm always learning and improving to make 
+                Think of me as your personal guide. I am always learning and improving to make 
                 better matches every day!
               </p>
             </div>
             <div className="flex-1 flex justify-center">
               <div className="w-64 h-64 bg-primary/10 rounded-3xl flex items-center justify-center">
-                <span className="text-8xl">😊</span>
+                <img src={logo} alt="Ed" className="h-32" />
               </div>
             </div>
           </div>
@@ -166,7 +169,7 @@ const Landing = () => {
             <p className="text-muted-foreground mb-6 leading-relaxed">
               My Dream Now creates inspiring meetings between students and working life. They help schools 
               connect with employers and volunteer role models through mentorship, classroom visits, and 
-              study trips – helping students discover their strengths and future paths.
+              study trips, helping students discover their strengths and future paths.
             </p>
             <a href="https://www.mydreamnow.se/" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline font-medium inline-flex items-center gap-2">
               Learn more about My Dream Now
