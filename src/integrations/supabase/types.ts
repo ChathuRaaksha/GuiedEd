@@ -14,7 +14,201 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      facilitators: {
+        Row: {
+          city: string | null
+          created_at: string
+          email: string
+          id: string
+          max_matches: number
+          name: string
+          notes: string | null
+          org: string | null
+          role: string | null
+          updated_at: string
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          max_matches?: number
+          name: string
+          notes?: string | null
+          org?: string | null
+          role?: string | null
+          updated_at?: string
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          max_matches?: number
+          name?: string
+          notes?: string | null
+          org?: string | null
+          role?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      invites: {
+        Row: {
+          created_at: string
+          id: string
+          mentor_id: string
+          reasons: string[] | null
+          score: number
+          status: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mentor_id: string
+          reasons?: string[] | null
+          score: number
+          status?: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mentor_id?: string
+          reasons?: string[] | null
+          score?: number
+          status?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invites_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invites_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentors: {
+        Row: {
+          age_pref: string | null
+          availability: string[] | null
+          bio: string | null
+          created_at: string
+          email: string
+          employer: string | null
+          first_name: string
+          id: string
+          languages: string[]
+          last_name: string
+          max_students: number
+          meeting_pref: string
+          role: string | null
+          skills: string[]
+          updated_at: string
+        }
+        Insert: {
+          age_pref?: string | null
+          availability?: string[] | null
+          bio?: string | null
+          created_at?: string
+          email: string
+          employer?: string | null
+          first_name: string
+          id?: string
+          languages?: string[]
+          last_name: string
+          max_students?: number
+          meeting_pref?: string
+          role?: string | null
+          skills?: string[]
+          updated_at?: string
+        }
+        Update: {
+          age_pref?: string | null
+          availability?: string[] | null
+          bio?: string | null
+          created_at?: string
+          email?: string
+          employer?: string | null
+          first_name?: string
+          id?: string
+          languages?: string[]
+          last_name?: string
+          max_students?: number
+          meeting_pref?: string
+          role?: string | null
+          skills?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      students: {
+        Row: {
+          availability: string[] | null
+          city: string | null
+          created_at: string
+          email: string
+          facilitator_id: string | null
+          first_name: string
+          goals: string | null
+          grade: number
+          id: string
+          interests: string[]
+          languages: string[]
+          last_name: string
+          meeting_pref: string
+          school: string | null
+          updated_at: string
+        }
+        Insert: {
+          availability?: string[] | null
+          city?: string | null
+          created_at?: string
+          email: string
+          facilitator_id?: string | null
+          first_name: string
+          goals?: string | null
+          grade: number
+          id?: string
+          interests?: string[]
+          languages?: string[]
+          last_name: string
+          meeting_pref?: string
+          school?: string | null
+          updated_at?: string
+        }
+        Update: {
+          availability?: string[] | null
+          city?: string | null
+          created_at?: string
+          email?: string
+          facilitator_id?: string | null
+          first_name?: string
+          goals?: string | null
+          grade?: number
+          id?: string
+          interests?: string[]
+          languages?: string[]
+          last_name?: string
+          meeting_pref?: string
+          school?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
