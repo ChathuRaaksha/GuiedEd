@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Users, Sparkles, Heart, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
+import edIcon from "@/assets/ed-icon.png";
 const Landing = () => {
   return <div className="min-h-screen bg-background">
       {/* Header */}
@@ -114,7 +115,7 @@ const Landing = () => {
             </div>
             <div className="flex-1 flex justify-center">
               <div className="w-64 h-64 bg-primary/10 rounded-3xl flex items-center justify-center">
-                <img src={logo} alt="Ed" className="h-32" />
+                <img src={edIcon} alt="Ed" className="h-32" />
               </div>
             </div>
           </div>
