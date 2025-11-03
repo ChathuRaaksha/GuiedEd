@@ -2,18 +2,13 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Users, Sparkles, Heart, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
-
 const Landing = () => {
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border sticky top-0 bg-background/95 backdrop-blur-sm z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <img src={logo} alt="GuidEd" className="h-10" />
           <nav className="hidden md:flex items-center gap-6">
-            <Link to="/onboarding/student" className="text-sm font-medium hover:text-primary transition-colors">
-              Start as Student
-            </Link>
             <Link to="/onboarding/mentor" className="text-sm font-medium hover:text-primary transition-colors">
               Become a Mentor
             </Link>
@@ -30,7 +25,7 @@ const Landing = () => {
           <div className="inline-block mb-6">
             <span className="tag-chip bg-accent/10 text-accent">
               <Sparkles className="w-4 h-4" />
-              AI Powered Mentorship
+              AI-Powered Mentorship
             </span>
           </div>
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
@@ -100,7 +95,7 @@ const Landing = () => {
           <div className="flex flex-col md:flex-row items-center gap-12">
             <div className="flex-1">
               <div className="inline-block mb-4">
-                <span className="tag-chip"><img src={logo} alt="Ed" className="h-5 w-5 inline-block mr-1" /> Meet Ed</span>
+                <span className="tag-chip">👋 Meet Ed</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-bold mb-6">
                 Your friendly AI mentor matchmaker
@@ -110,13 +105,13 @@ const Landing = () => {
                 goals, and preferences to connect you with mentors who can truly help you grow.
               </p>
               <p className="text-lg text-muted-foreground">
-                Think of me as your personal guide. I'm always learning and improving to make 
+                Think of me as your personal guide - I'm always learning and improving to make 
                 better matches every day!
               </p>
             </div>
             <div className="flex-1 flex justify-center">
               <div className="w-64 h-64 bg-primary/10 rounded-3xl flex items-center justify-center">
-                <img src={logo} alt="Ed" className="w-32 h-32" />
+                <span className="text-8xl">😊</span>
               </div>
             </div>
           </div>
@@ -173,12 +168,7 @@ const Landing = () => {
               connect with employers and volunteer role models through mentorship, classroom visits, and 
               study trips – helping students discover their strengths and future paths.
             </p>
-            <a 
-              href="https://www.mydreamnow.se/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-accent hover:underline font-medium inline-flex items-center gap-2"
-            >
+            <a href="https://www.mydreamnow.se/" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline font-medium inline-flex items-center gap-2">
               Learn more about My Dream Now
               <ArrowRight className="w-4 h-4" />
             </a>
@@ -214,13 +204,11 @@ const Landing = () => {
           </div>
           <div className="border-t border-border mt-8 pt-8 text-center">
             <p className="text-sm text-muted-foreground">
-              © 2025 GuidEd. All rights reserved. | <a href="mailto:contact@guided.app" className="hover:text-primary transition-colors">Contact</a>
+              © 2025 GuidEd. All rights reserved. | 
             </p>
           </div>
         </div>
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Landing;
