@@ -150,7 +150,7 @@ const StudentOnboarding = () => {
             <div className="space-y-6 animate-fade-in">
               <div>
                 <h1 className="text-3xl font-bold mb-2">
-                  Hi 👋 I'm Ed – ready to help you find your mentor!
+                  Hi 👋 I'm Ed, ready to help you find your mentor!
                 </h1>
                 <p className="text-muted-foreground">
                   Let's start with some basic information about you.

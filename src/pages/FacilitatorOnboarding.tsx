@@ -159,7 +159,7 @@ const FacilitatorOnboarding = () => {
             <div className="bg-secondary/30 p-4 rounded-xl">
               <h3 className="font-medium mb-2">What facilitators do:</h3>
               <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• Review and approve student-mentor matches</li>
+                <li>• Review and approve student and mentor matches</li>
                 <li>• Monitor mentorship progress</li>
                 <li>• Ensure quality and safety of connections</li>
                 <li>• Provide support when needed</li>
