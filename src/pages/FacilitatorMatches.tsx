@@ -204,7 +204,7 @@ const FacilitatorMatches = () => {
 
           <EdAIBanner />
 
-          <div className="mb-10 flex gap-4">
+          <div className="mb-10 mt-8 flex gap-4">
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4 text-muted-foreground" />
               <Select value={filterStatus} onValueChange={setFilterStatus}>
