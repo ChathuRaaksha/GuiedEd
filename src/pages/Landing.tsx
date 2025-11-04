@@ -169,43 +169,79 @@ const Landing = () => {
             <p className="text-center text-muted-foreground mb-12 max-w-3xl mx-auto text-lg">
               We are SU Heroes, a multidisciplinary team from Stockholm University who joined forces during the CHAS Academy AI-Assisted Workflow Coding Hackathon. Our shared mission is to make mentorship more accessible, inclusive, and fun through technology and human connection.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center max-w-5xl mx-auto">
-              {[
-                { name: "Jady Pamella", role: "AI, Cybersecurity & IT Consultant", linkedin: "https://linkedin.com/in/jadypamella", photo: jadyPhoto },
-                { name: "Phuwit Vititayanon", role: "Data Scientist & AI Maker", linkedin: "https://linkedin.com/in/phuwit-vititayanon-4b6503157", photo: phuwitPhoto },
-                { name: "Maria Hellsen", role: "AI Business Consultant & Frontend Development Student", linkedin: "https://linkedin.com/in/maria-hellsen-9805723", photo: mariaPhoto },
-                { name: "Reza Rezvani", role: "Partnership Manager at My Dream Now", linkedin: "https://linkedin.com/in/reza-rezvani-bb699011b", photo: rezaPhoto },
-                { name: "Tobias Nilsson", role: "Independent Consultant in Business & Requirements Analysis", linkedin: "https://linkedin.com/in/tobiasnilsson75", photo: tobiasPhoto },
-                { name: "Praneet Kala", role: "Digitalisation, Workflow Automation & Storytelling", linkedin: "https://linkedin.com/in/praneet-kala-0b165678", photo: praneetPhoto },
-                { name: "Supun Chathuranga", role: "AI & Fullstack Engineer", linkedin: "https://linkedin.com/in/supun-chathuranga-190372148", photo: supunPhoto },
-              ].map((member, index) => (
-                <div
-                  key={index}
-                  className="bg-card p-6 rounded-3xl text-center card-hover group w-full max-w-xs"
-                >
-                  <div className="relative w-32 h-32 mx-auto mb-4">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-xl" />
-                    <img
-                      src={member.photo}
-                      alt={member.name}
-                      className="w-full h-full rounded-full object-cover border-4 border-background shadow-lg relative z-10"
-                    />
-                  </div>
-                  <h3 className="font-bold text-lg mb-2">{member.name}</h3>
-                  <p className="text-sm text-muted-foreground mb-4 min-h-[2.5rem]">
-                    {member.role}
-                  </p>
-                  <a
-                    href={member.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-accent hover:text-primary transition-colors"
+            <div className="flex flex-col items-center gap-8">
+              {/* First row - 4 people */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl">
+                {[
+                  { name: "Jady Pamella", role: "AI, Cybersecurity & IT Consultant", linkedin: "https://linkedin.com/in/jadypamella", photo: jadyPhoto },
+                  { name: "Phuwit Vititayanon", role: "Data Scientist & AI Maker", linkedin: "https://linkedin.com/in/phuwit-vititayanon-4b6503157", photo: phuwitPhoto },
+                  { name: "Maria Hellsen", role: "AI Business Consultant & Frontend Development Student", linkedin: "https://linkedin.com/in/maria-hellsen-9805723", photo: mariaPhoto },
+                  { name: "Reza Rezvani", role: "Partnership Manager at My Dream Now", linkedin: "https://linkedin.com/in/reza-rezvani-bb699011b", photo: rezaPhoto },
+                ].map((member, index) => (
+                  <div
+                    key={index}
+                    className="bg-card p-6 rounded-3xl text-center card-hover group w-full max-w-xs"
                   >
-                    <Linkedin className="w-5 h-5" />
-                    <span className="text-sm font-medium">LinkedIn</span>
-                  </a>
-                </div>
-              ))}
+                    <div className="relative w-32 h-32 mx-auto mb-4">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-xl" />
+                      <img
+                        src={member.photo}
+                        alt={member.name}
+                        className="w-full h-full rounded-full object-cover border-4 border-background shadow-lg relative z-10"
+                      />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">{member.name}</h3>
+                    <p className="text-sm text-muted-foreground mb-4 min-h-[2.5rem]">
+                      {member.role}
+                    </p>
+                    <a
+                      href={member.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-accent hover:text-primary transition-colors"
+                    >
+                      <Linkedin className="w-5 h-5" />
+                      <span className="text-sm font-medium">LinkedIn</span>
+                    </a>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Second row - 3 people centered */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-4xl">
+                {[
+                  { name: "Tobias Nilsson", role: "Independent Consultant in Business & Requirements Analysis", linkedin: "https://linkedin.com/in/tobiasnilsson75", photo: tobiasPhoto },
+                  { name: "Praneet Kala", role: "Digitalisation, Workflow Automation & Storytelling", linkedin: "https://linkedin.com/in/praneet-kala-0b165678", photo: praneetPhoto },
+                  { name: "Supun Chathuranga", role: "AI & Fullstack Engineer", linkedin: "https://linkedin.com/in/supun-chathuranga-190372148", photo: supunPhoto },
+                ].map((member, index) => (
+                  <div
+                    key={index}
+                    className="bg-card p-6 rounded-3xl text-center card-hover group w-full max-w-xs"
+                  >
+                    <div className="relative w-32 h-32 mx-auto mb-4">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-xl" />
+                      <img
+                        src={member.photo}
+                        alt={member.name}
+                        className="w-full h-full rounded-full object-cover border-4 border-background shadow-lg relative z-10"
+                      />
+                    </div>
+                    <h3 className="font-bold text-lg mb-2">{member.name}</h3>
+                    <p className="text-sm text-muted-foreground mb-4 min-h-[2.5rem]">
+                      {member.role}
+                    </p>
+                    <a
+                      href={member.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-accent hover:text-primary transition-colors"
+                    >
+                      <Linkedin className="w-5 h-5" />
+                      <span className="text-sm font-medium">LinkedIn</span>
+                    </a>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
