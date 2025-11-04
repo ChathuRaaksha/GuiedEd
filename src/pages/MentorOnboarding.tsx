@@ -398,8 +398,8 @@ const MentorOnboarding = () => {
                         onClick={() => toggleArrayItem("skills", skill)}
                         className={`tag-chip transition-all ${
                           formData.skills.includes(skill)
-                            ? "bg-primary text-primary-foreground"
-                            : ""
+                            ? "bg-accent text-accent-foreground border-2 border-accent font-semibold scale-105"
+                            : "border border-border hover:border-accent"
                         }`}
                       >
                         {skill}
@@ -418,8 +418,8 @@ const MentorOnboarding = () => {
                         onClick={() => toggleArrayItem("hobbies", hobby)}
                         className={`tag-chip transition-all ${
                           formData.hobbies.includes(hobby)
-                            ? "bg-accent text-accent-foreground"
-                            : ""
+                            ? "bg-accent text-accent-foreground border-2 border-accent font-semibold scale-105"
+                            : "border border-border hover:border-accent"
                         }`}
                       >
                         {hobby}
@@ -438,8 +438,8 @@ const MentorOnboarding = () => {
                         onClick={() => toggleArrayItem("languages", lang)}
                         className={`tag-chip transition-all ${
                           formData.languages.includes(lang)
-                            ? "bg-accent text-accent-foreground"
-                            : ""
+                            ? "bg-accent text-accent-foreground border-2 border-accent font-semibold scale-105"
+                            : "border border-border hover:border-accent"
                         }`}
                       >
                         {lang}

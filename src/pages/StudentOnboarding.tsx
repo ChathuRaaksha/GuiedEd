@@ -329,8 +329,8 @@ const StudentOnboarding = () => {
                       onClick={() => toggleArrayItem("languages", lang)}
                       className={`tag-chip transition-all ${
                         formData.languages.includes(lang)
-                          ? "bg-accent text-accent-foreground"
-                          : ""
+                          ? "bg-accent text-accent-foreground border-2 border-accent font-semibold scale-105"
+                          : "border border-border hover:border-accent"
                       }`}
                     >
                       {lang}
@@ -349,8 +349,8 @@ const StudentOnboarding = () => {
                       onClick={() => toggleArrayItem("subjects", subject)}
                       className={`tag-chip transition-all ${
                         formData.subjects.includes(subject)
-                          ? "bg-primary text-primary-foreground"
-                          : ""
+                          ? "bg-accent text-accent-foreground border-2 border-accent font-semibold scale-105"
+                          : "border border-border hover:border-accent"
                       }`}
                     >
                       {subject}
@@ -369,8 +369,8 @@ const StudentOnboarding = () => {
                       onClick={() => toggleArrayItem("interests", interest)}
                       className={`tag-chip transition-all ${
                         formData.interests.includes(interest)
-                          ? "bg-primary text-primary-foreground"
-                          : ""
+                          ? "bg-accent text-accent-foreground border-2 border-accent font-semibold scale-105"
+                          : "border border-border hover:border-accent"
                       }`}
                     >
                       {interest}
