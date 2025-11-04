@@ -360,23 +360,27 @@ const StudentOnboarding = () => {
               </div>
 
               <div>
-                <Label className="mb-3 block">Favorite school subjects *</Label>
-                <div className="flex flex-wrap gap-2">
-                  {SUBJECT_OPTIONS.map((subject) => (
-                    <button
-                      key={subject}
-                      type="button"
-                      onClick={() => toggleArrayItem("subjects", subject)}
-                      className={`tag-chip transition-all ${
-                        formData.subjects.includes(subject)
-                          ? "bg-accent text-primary border-2 border-primary font-semibold scale-105"
-                          : "border border-border hover:border-accent"
-                      }`}
-                    >
-                      {subject}
-                    </button>
-                  ))}
-                </div>
+                <Label htmlFor="talkAboutYourself">Talk about yourself</Label>
+                <Textarea
+                  id="talkAboutYourself"
+                  value={formData.talkAboutYourself}
+                  onChange={(e) => handleInputChange("talkAboutYourself", e.target.value)}
+                  placeholder="Share something about yourself... (e.g., your hobbies, what you enjoy doing)"
+                  className="mt-1 min-h-[100px] rounded-xl"
+                  maxLength={500}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="goals">What are your goals?</Label>
+                <Textarea
+                  id="goals"
+                  value={formData.goals}
+                  onChange={(e) => handleInputChange("goals", e.target.value)}
+                  placeholder="Tell me what you want to achieve... (e.g., explore careers in tech, improve leadership skills)"
+                  className="mt-1 min-h-[100px] rounded-xl"
+                  maxLength={500}
+                />
               </div>
 
               <div>
@@ -400,27 +404,23 @@ const StudentOnboarding = () => {
               </div>
 
               <div>
-                <Label htmlFor="goals">What are your goals?</Label>
-                <Textarea
-                  id="goals"
-                  value={formData.goals}
-                  onChange={(e) => handleInputChange("goals", e.target.value)}
-                  placeholder="Tell me what you want to achieve... (e.g., explore careers in tech, improve leadership skills)"
-                  className="mt-1 min-h-[100px] rounded-xl"
-                  maxLength={500}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="talkAboutYourself">Talk about yourself</Label>
-                <Textarea
-                  id="talkAboutYourself"
-                  value={formData.talkAboutYourself}
-                  onChange={(e) => handleInputChange("talkAboutYourself", e.target.value)}
-                  placeholder="Share something about yourself... (e.g., your hobbies, what you enjoy doing)"
-                  className="mt-1 min-h-[100px] rounded-xl"
-                  maxLength={500}
-                />
+                <Label className="mb-3 block">Favorite school subjects *</Label>
+                <div className="flex flex-wrap gap-2">
+                  {SUBJECT_OPTIONS.map((subject) => (
+                    <button
+                      key={subject}
+                      type="button"
+                      onClick={() => toggleArrayItem("subjects", subject)}
+                      className={`tag-chip transition-all ${
+                        formData.subjects.includes(subject)
+                          ? "bg-accent text-primary border-2 border-primary font-semibold scale-105"
+                          : "border border-border hover:border-accent"
+                      }`}
+                    >
+                      {subject}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="flex gap-4">
