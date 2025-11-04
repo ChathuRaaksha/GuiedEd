@@ -9,8 +9,12 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { calculateMatch, ScoredMatch } from "@/utils/matchingAlgorithm";
+import { ScoredMatch } from "@/utils/matchingAlgorithm";
 import { Header } from "@/components/Header";
+import { matchStudent } from "@/services/api";
+import { sendInviteEmail } from "@/services/emailApi";
+import { mockMentors } from "@/data/mockMentors";
+import { mapStudentToBackendFormat, mapMentorToBackendFormat, mapScoresToMentors, validateStudentProfile } from "@/utils/dataMappers";
 import { ScoreBar } from "@/components/match/ScoreBar";
 import { ReasonChips } from "@/components/match/ReasonChips";
 import { MeetingModal } from "@/components/match/MeetingModal";
@@ -21,6 +25,7 @@ const StudentMatch = () => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [matching, setMatching] = useState(false);
   const [studentProfile, setStudentProfile] = useState<any>(null);
   const [availableMatches, setAvailableMatches] = useState<ScoredMatch[]>([]);
   const [receivedInvites, setReceivedInvites] = useState<any[]>([]);
@@ -47,33 +52,54 @@ const StudentMatch = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const { data: studentData, error: studentError } = await supabase
-        .from("students")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle();
+      // First check sessionStorage for mock profile (MOCK MODE)
+      const sessionProfile = sessionStorage.getItem('studentProfile');
+      let studentData = null;
+      let useMockMode = false;
 
-      if (studentError) throw studentError;
-      if (!studentData) {
-        toast.error("Please complete your student profile first");
-        navigate("/onboarding/student");
-        return;
+      if (sessionProfile) {
+        // Use mock profile from sessionStorage
+        studentData = JSON.parse(sessionProfile);
+        useMockMode = true;
+        console.log('Using student profile from sessionStorage (MOCK MODE):', studentData);
+      } else {
+        // Fall back to database
+        const { data: dbStudentData, error: studentError } = await supabase
+          .from("students")
+          .select("*")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (studentError) throw studentError;
+        if (!dbStudentData) {
+          toast.error("Please complete your student profile first");
+          navigate("/onboarding/student");
+          return;
+        }
+
+        studentData = dbStudentData;
       }
 
       setStudentProfile(studentData);
 
-      const { data: mentors, error: mentorsError } = await supabase
-        .from("mentors")
-        .select("*");
+      // In MOCK MODE, skip database queries and use mock data directly
+      let invites = [];
 
-      if (mentorsError) throw mentorsError;
+      if (!useMockMode) {
+        const { data: mentors, error: mentorsError } = await supabase
+          .from("mentors")
+          .select("*");
 
-      const { data: invites, error: invitesError } = await supabase
-        .from("invites")
-        .select("*")
-        .eq("student_id", studentData.id);
+        if (mentorsError) throw mentorsError;
 
-      if (invitesError) throw invitesError;
+        const { data: invitesData, error: invitesError } = await supabase
+          .from("invites")
+          .select("*")
+          .eq("student_id", studentData.id);
+
+        if (invitesError) throw invitesError;
+        invites = invitesData || [];
+      }
 
       const rejectedMentorIds = new Set(
         invites
@@ -81,80 +107,66 @@ const StudentMatch = () => {
           .map(inv => inv.mentor_id)
       );
 
-      const availableMentors = mentors?.filter(m => !rejectedMentorIds.has(m.id)) || [];
-      const scoredMatches = calculateMatch(studentData, availableMentors);
+      // Use mock mentors instead of database mentors  
+      const availableMockMentors = mockMentors.filter(m => !rejectedMentorIds.has(m.id));
       
-      // Add mock mentors if no real matches (for testing UI)
-      const mockMentors: ScoredMatch[] = scoredMatches.length === 0 ? [
-        {
-          mentor: {
-            id: 'mock-1',
-            first_name: 'Sofia',
-            last_name: 'Andersson',
-            role: 'Software Engineer',
-            employer: 'Spotify',
-            bio: 'Passionate about helping students discover their potential in tech. 10+ years of experience in software development.',
-            skills: ['Python', 'JavaScript', 'React', 'Machine Learning', 'Data Science'],
-            hobbies: ['Hiking', 'Photography', 'Gaming'],
-            languages: ['English', 'Swedish'],
-            age_pref: 'any',
-            meeting_pref: 'online',
-            max_students: 3,
-          },
-          score: 85,
-          reasons: ['3 shared interests', '2 common languages', 'Education level compatible', 'Meeting preference match'],
-        },
-        {
-          mentor: {
-            id: 'mock-2',
-            first_name: 'Lars',
-            last_name: 'Bergström',
-            role: 'Product Designer',
-            employer: 'Klarna',
-            bio: 'Helping young creatives find their voice in design. Love teaching UX/UI principles.',
-            skills: ['UI Design', 'Figma', 'User Research', 'Prototyping', 'Art'],
-            hobbies: ['Art', 'Music', 'Travel'],
-            languages: ['English', 'Swedish', 'Spanish'],
-            age_pref: 'high_school',
-            meeting_pref: 'either',
-            max_students: 2,
-          },
-          score: 72,
-          reasons: ['2 shared interests', 'Perfect education match (High School)', '3 common languages'],
-        },
-        {
-          mentor: {
-            id: 'mock-3',
-            first_name: 'Emma',
-            last_name: 'Karlsson',
-            role: 'Data Scientist',
-            employer: 'Ericsson',
-            bio: 'Making data science accessible to everyone. Former teacher, now in tech.',
-            skills: ['Data Analysis', 'Statistics', 'Python', 'Science', 'Mathematics'],
-            hobbies: ['Reading', 'Pets', 'Nature & Outdoors'],
-            languages: ['English', 'Swedish'],
-            age_pref: 'any',
-            meeting_pref: 'online',
-            max_students: 4,
-          },
-          score: 68,
-          reasons: ['1 matching subject', '2 common languages', 'Meeting preference match', 'Education level compatible'],
-        },
-      ] : scoredMatches;
+      // Show loading animation IMMEDIATELY while matching
+      setMatching(true);
+      setLoading(false); // Stop initial loading to show matching animation
       
-      setAvailableMatches(mockMentors); // Show ALL matches
+      // Validate student profile before calling backend
+      const validation = validateStudentProfile(studentData);
+      if (!validation.valid) {
+        console.error("Student profile validation error:", validation.error);
+        toast.error(validation.error || "Please complete your profile");
+        setAvailableMatches([]);
+        setMatching(false);
+      } else {
+        
+        try {
+          // Transform data for backend API
+          const backendStudent = mapStudentToBackendFormat(studentData);
+          const backendMentors = availableMockMentors.map(mapMentorToBackendFormat);
 
-      const received = invites?.filter(inv => 
-        inv.created_by !== 'student' && 
+          // Call backend matching API
+          console.log("Calling backend matching API with:", { student: backendStudent, mentors: backendMentors.length });
+          const matchingResponse = await matchStudent({
+            student: backendStudent,
+            mentors: backendMentors
+          });
+
+          console.log("Backend response:", matchingResponse);
+
+          // Map backend scores back to mentor profiles
+          const scoredMatches = mapScoresToMentors(availableMockMentors, matchingResponse.suggest);
+          setAvailableMatches(scoredMatches);
+
+          toast.success(`Found ${scoredMatches.length} matches using backend AI!`);
+        } catch (error: any) {
+          console.error("Error calling backend matching API:", error);
+          toast.error("Backend matching unavailable. Using fallback data.");
+          // Use mock data as fallback with default scores
+          setAvailableMatches(availableMockMentors.map(mentor => ({
+            mentor,
+            score: 75,
+            reasons: ['Fallback match'],
+          })));
+        } finally {
+          setMatching(false);
+        }
+      }
+
+      const received = invites?.filter(inv =>
+        inv.created_by !== 'student' &&
         inv.status !== 'rejected_by_student' &&
         inv.status !== 'rejected_by_mentor'
       ) || [];
-      
-      const sent = invites?.filter(inv => 
+
+      const sent = invites?.filter(inv =>
         inv.created_by === 'student' || inv.created_by === 'system'
       ) || [];
 
-      if (received.length > 0) {
+      if (!useMockMode && received.length > 0) {
         const mentorIds = received.map(inv => inv.mentor_id);
         const { data: mentorDetails } = await supabase
           .from("mentors")
@@ -165,6 +177,8 @@ const StudentMatch = () => {
           ...inv,
           mentor: mentorDetails?.find(m => m.id === inv.mentor_id)
         })));
+      } else {
+        setReceivedInvites([]);
       }
 
       setSentInvites(sent);
@@ -177,17 +191,64 @@ const StudentMatch = () => {
   };
 
   const handleSendInvite = async (mentorId: string, score: number, reasons: string[]) => {
-    // Handle mock mentors
+    // Handle mock mentors - send email to mock mentors
     if (mentorId.startsWith('mock-')) {
-      setMockSentInvites(prev => new Set([...prev, mentorId]));
-      toast.success("Mock invite sent!");
+      const mentor = mockMentors.find(m => m.id === mentorId);
+      if (!mentor || !studentProfile) return;
+
+      try {
+        // Send email to mock mentor
+        await sendInviteEmail({
+          invite_id: `mock-${Date.now()}`,
+          student_id: studentProfile.id,
+          mentor_id: mentorId,
+          match_score: score,
+          reasons,
+          student_data: {
+            first_name: studentProfile.first_name,
+            last_name: studentProfile.last_name,
+            email: studentProfile.email,
+            education_level: studentProfile.grade ? `Grade ${studentProfile.grade}` : 'Not specified',
+            school: studentProfile.school,
+            city: studentProfile.city,
+            interests: studentProfile.interests || [],
+            languages: studentProfile.languages || [],
+            goals: studentProfile.goals,
+            meeting_pref: studentProfile.meeting_pref,
+          },
+          mentor_data: {
+            first_name: mentor.first_name,
+            last_name: mentor.last_name,
+            email: mentor.email,
+          },
+        });
+
+        setMockSentInvites(prev => new Set([...prev, mentorId]));
+        toast.success("Invitation sent! Email delivered to mentor 📧");
+      } catch (error) {
+        console.error("Error sending email to mock mentor:", error);
+        toast.error("Failed to send email invitation");
+      }
       return;
     }
 
     if (!studentProfile) return;
 
+    // Check daily invite limit (3 per day)
+    const todayInvites = sentInvites.filter(inv => {
+      const inviteDate = new Date(inv.created_at);
+      const today = new Date();
+      return inviteDate.toDateString() === today.toDateString();
+    });
+
+    if (todayInvites.length >= 3) {
+      toast.error("Daily limit reached! You can send up to 3 invites per day.");
+      return;
+    }
+
     try {
-      const { error } = await supabase
+      // Create invite in database
+      const { data: newInvite, error } = await supabase
         .from("invites")
         .insert({
           student_id: studentProfile.id,
@@ -196,11 +257,56 @@ const StudentMatch = () => {
           reasons,
           status: 'proposed',
           created_by: 'student',
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
-      toast.success("Match request sent!");
+      // Get mentor details for email
+      const { data: mentorData } = await supabase
+        .from("mentors")
+        .select("*")
+        .eq("id", mentorId)
+        .single();
+
+      if (mentorData) {
+        // Send email notification to mentor
+        try {
+          await sendInviteEmail({
+            invite_id: newInvite.id,
+            student_id: studentProfile.id,
+            mentor_id: mentorId,
+            match_score: score,
+            reasons,
+            student_data: {
+              first_name: studentProfile.first_name,
+              last_name: studentProfile.last_name,
+              email: studentProfile.email,
+              education_level: studentProfile.grade ? `Grade ${studentProfile.grade}` : 'Not specified',
+              school: studentProfile.school,
+              city: studentProfile.city,
+              interests: studentProfile.interests || [],
+              languages: studentProfile.languages || [],
+              goals: studentProfile.goals,
+              meeting_pref: studentProfile.meeting_pref,
+            },
+            mentor_data: {
+              first_name: mentorData.first_name,
+              last_name: mentorData.last_name,
+              email: mentorData.email,
+            },
+          });
+          
+          toast.success("Match request sent! Email notification delivered to mentor 📧");
+        } catch (emailError) {
+          console.error("Error sending email:", emailError);
+          toast.warning("Invite created, but email notification failed");
+        }
+      } else {
+        toast.success("Match request sent!");
+      }
+
       await loadData();
     } catch (error: any) {
       console.error("Error sending invite:", error);
@@ -314,6 +420,16 @@ const StudentMatch = () => {
 
           <EdAIBanner />
 
+          {matching && (
+            <Card className="p-8 text-center">
+              <Loader2 className="w-12 h-12 text-primary mx-auto mb-4 animate-spin" />
+              <h3 className="text-xl font-semibold mb-2">Finding Your Perfect Matches...</h3>
+              <p className="text-muted-foreground">
+                Our AI is analyzing compatibility with mentors based on your profile
+              </p>
+            </Card>
+          )}
+
           <Tabs defaultValue="discover" className="space-y-6">
             <TabsList>
               <TabsTrigger value="discover">Discover</TabsTrigger>
@@ -380,7 +496,23 @@ const StudentMatch = () => {
                             </div>
                           </div>
 
-                          <ReasonChips reasons={match.reasons} />
+                          {match.reasoning && (
+                            <div className="bg-accent/30 border-l-4 border-primary p-4 rounded-r-lg">
+                              <div className="flex items-start gap-2">
+                                <Sparkles className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                                <div>
+                                  <p className="text-sm font-semibold text-primary mb-1">
+                                    Why this mentor is perfect for you
+                                  </p>
+                                  <p className="text-sm text-foreground/90">
+                                    {match.reasoning}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {!match.reasoning && <ReasonChips reasons={match.reasons} />}
 
                           {match.firstOverlap && (
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">

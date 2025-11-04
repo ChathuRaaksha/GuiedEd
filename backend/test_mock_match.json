@@ -1,0 +1,15 @@
+{
+  "student": {
+    "firstName": "Test",
+    "lastName": "Student",
+    "educationLevel": "university",
+    "city": "Stockholm",
+    "postcode": "11122",
+    "interests": ["💻 Technology", "🎮 Gaming"],
+    "languages": ["Swedish", "English"],
+    "subjects": ["🔢 Mathematics", "💻 Technology"],
+    "talkAboutYourself": "I love coding and want to become a software engineer",
+    "goals": "I want to learn software engineering and build apps",
+    "meetingPref": "online"
+  }
+}

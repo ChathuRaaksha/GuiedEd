@@ -25,9 +25,16 @@ class Config:
     # Data files
     INTERESTS_CSV_PATH = os.path.join(os.path.dirname(__file__), 'data', 'interests.csv')
     
+    # Email Configuration
+    SMTP_USER = os.getenv('SMTP_USER', 'chathurangarulz@gmail.com')
+    SMTP_PASSWORD = os.getenv('SMTP_PASSWORD', 'nmrsgbbekvfaubcn')
+    BACKEND_URL = os.getenv('BACKEND_URL', 'http://localhost:5001')
+    
     @classmethod
     def validate(cls):
         """Validate that required configuration is present"""
         if not cls.OPENROUTER_API_KEY:
             raise ValueError("OPENROUTER_API_KEY environment variable is required")
+        if not cls.SMTP_USER or not cls.SMTP_PASSWORD:
+            raise ValueError("Email configuration (SMTP_USER, SMTP_PASSWORD) is required")
         return True

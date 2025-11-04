@@ -151,30 +151,55 @@ async def geocode_postcodes(postcodes: Dict[str, str]) -> Dict[str, Tuple[float,
 
 @activity.defn
 async def calculate_mentor_matches(
-    student: Dict[str, Any], 
-    mentors: List[Dict[str, Any]], 
+    student: Dict[str, Any],
+    mentors: List[Dict[str, Any]],
     coordinates: Dict[str, Tuple[float, float]]
 ) -> List[Dict[str, Any]]:
     """
     Calculate matching scores between a student and mentors.
-    
+
     Args:
         student: Student profile dictionary
-        mentors: List of mentor profile dictionaries  
+        mentors: List of mentor profile dictionaries
         coordinates: Dict mapping person_id -> (lat, lng)
-        
+
     Returns:
-        List of matches with mentor_id and score, sorted by score descending
+        List of matches with mentor_id, score, and reasoning, sorted by score descending
     """
     activity.logger.info(f"Calculating matches for student against {len(mentors)} mentors")
-    
+
     try:
         scorer = MatchingScorer()
         matches = scorer.calculate_matches(student, mentors, coordinates)
-        
+
         activity.logger.info(f"Generated {len(matches)} matches with scores > 0")
+
+        # Generate unique reasoning for TOP 10 matches only (to avoid timeouts)
+        top_matches = matches[:10]
+        activity.logger.info(f"Generating personalized reasoning for top {len(top_matches)} matches...")
+
+        for match in top_matches:
+            # Find the mentor details
+            mentor = next((m for m in mentors if m['id'] == match['mentor_id']), None)
+            if mentor:
+                try:
+                    # Generate personalized reasoning using LLM
+                    reasoning = await generate_match_reasoning(student, mentor, match['score'], activity.logger)
+                    match['reasoning'] = reasoning
+                except Exception as e:
+                    activity.logger.error(f"Error generating reasoning for {mentor.get('id')}: {str(e)}")
+                    # Fallback to generic reasoning if LLM fails
+                    match['reasoning'] = f"{match['score']}% match based on compatible interests and goals."
+            else:
+                match['reasoning'] = "Good compatibility match."
+
+        # Add generic reasoning for remaining matches
+        for match in matches[10:]:
+            match['reasoning'] = f"{match['score']}% compatibility based on shared interests and goals."
+
+        activity.logger.info(f"Generated personalized reasoning for {len(top_matches)} matches, generic for {len(matches) - len(top_matches)}")
         return matches
-        
+
     except Exception as e:
         activity.logger.error(f"Error in calculate_mentor_matches: {str(e)}")
         raise
@@ -209,3 +234,110 @@ async def validate_matching_data(data: Dict[str, Any]) -> bool:
     except Exception as e:
         activity.logger.error(f"Error in validate_matching_data: {str(e)}")
         raise
+
+
+async def generate_match_reasoning(
+    student: Dict[str, Any],
+    mentor: Dict[str, Any],
+    score: int,
+    logger=None
+) -> str:
+    """
+    Use LLM to generate personalized reasoning for why a mentor matches a student.
+    Helper function (not an activity) that can be called from within activities.
+
+    Args:
+        student: Student profile dictionary
+        mentor: Mentor profile dictionary
+        score: Match score
+        logger: Optional logger instance
+
+    Returns:
+        A 1-2 sentence natural language explanation of the match
+    """
+    if logger:
+        logger.info(f"Generating match reasoning for student-mentor pair (score: {score})")
+    else:
+        print(f"Generating match reasoning for student-mentor pair (score: {score})")
+    
+    try:
+        # Initialize OpenAI client with OpenRouter
+        client = OpenAI(
+            base_url=Config.OPENROUTER_BASE_URL,
+            api_key=Config.OPENROUTER_API_KEY
+        )
+        
+        # Build student context
+        student_context = []
+        if student.get('goals'):
+            student_context.append(f"Goals: {student['goals']}")
+        if student.get('bio'):
+            student_context.append(f"About: {student['bio']}")
+        if student.get('interests'):
+            student_context.append(f"Interests: {', '.join(student['interests'])}")
+        if student.get('subjects'):
+            student_context.append(f"Favorite subjects: {', '.join(student['subjects'])}")
+        
+        student_desc = "\n".join(student_context) if student_context else "Student seeking mentorship"
+        
+        # Build mentor context
+        mentor_name = f"{mentor.get('first_name', '')} {mentor.get('last_name', '')}".strip()
+        mentor_role = mentor.get('role', 'Professional')
+        mentor_bio = mentor.get('bio', '')
+        mentor_skills = ', '.join(mentor.get('skills', []))
+        mentor_interests = ', '.join(mentor.get('interests', []))
+        
+        # Create the prompt
+        prompt = f"""You are an expert career counselor and mentorship matcher. Generate a compelling, personalized 1-2 sentence explanation for why this mentor is a great match for this student.
+
+STUDENT PROFILE:
+{student_desc}
+
+MENTOR PROFILE:
+Name: {mentor_name}
+Role: {mentor_role}
+Bio: {mentor_bio}
+Skills: {mentor_skills}
+Interests: {mentor_interests}
+
+Match Score: {score}/100
+
+Based on the student's goals, interests, and the mentor's experience, write a natural, engaging 1-2 sentence explanation of why they're compatible. Focus on:
+- Shared interests or passions
+- How the mentor's expertise aligns with student's goals or curiosity
+- Specific connections between what the student wants to learn/explore and what the mentor offers
+- Use a warm, encouraging tone
+
+If the student is uncertain about their goals but has interests, emphasize how the mentor can help them explore those interests.
+
+Respond with ONLY the 1-2 sentence explanation, nothing else."""
+
+        # Make API call to OpenRouter
+        if logger:
+            logger.info(f"Calling OpenRouter API for match reasoning")
+
+        response = client.chat.completions.create(
+            model=Config.LLM_MODEL,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            temperature=0.7,  # Slightly creative for personalized responses
+            max_tokens=150
+        )
+
+        # Extract the response
+        reasoning = response.choices[0].message.content.strip()
+        if logger:
+            logger.info(f"Generated reasoning: {reasoning}")
+
+        return reasoning
+
+    except Exception as e:
+        if logger:
+            logger.error(f"Error in generate_match_reasoning: {str(e)}")
+        # Return a fallback message if LLM fails
+        mentor_skills = ', '.join(mentor.get('skills', [])[:2])
+        return f"Specializes in {mentor_skills if mentor_skills else mentor.get('bio', 'their field')[:50]}."

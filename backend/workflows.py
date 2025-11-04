@@ -141,16 +141,14 @@ class MatchingWorkflow:
             
             workflow.logger.info(f"Geocoded {len(coordinates)} postcodes successfully")
             
-            # Step 4: Calculate matching scores
+            # Step 4: Calculate matching scores (includes LLM reasoning generation)
             matches = await workflow.execute_activity(
                 calculate_mentor_matches,
-                student,
-                mentors,
-                coordinates,
-                start_to_close_timeout=timedelta(seconds=30),
+                args=(student, mentors, coordinates),
+                start_to_close_timeout=timedelta(seconds=300),  # 5 minutes for multiple LLM calls
                 retry_policy=RetryPolicy(
-                    initial_interval=timedelta(seconds=1),
-                    maximum_interval=timedelta(seconds=5),
+                    initial_interval=timedelta(seconds=2),
+                    maximum_interval=timedelta(seconds=10),
                     maximum_attempts=2,
                     backoff_coefficient=2.0,
                 )

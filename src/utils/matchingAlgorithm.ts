@@ -28,6 +28,7 @@ export interface ScoredMatch {
   mentor: Mentor;
   score: number;
   reasons: string[];
+  reasoning?: string;
   firstOverlap?: string;
 }
 

@@ -1,10 +1,12 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, redirect
 from flask_cors import CORS
 import asyncio
 import logging
+from datetime import datetime, timedelta
 from temporalio.client import Client
 from config import Config
 from workflows import CVAnalysisWorkflow, MatchingWorkflow
+from email_service import EmailService
 
 # Configure logging
 logging.basicConfig(
@@ -290,7 +292,7 @@ async def execute_matching_workflow(matching_data: dict) -> dict:
 def get_interests():
     """
     Get the list of all available interests.
-    
+
     Response:
     {
         "interests": ["Interest1", "Interest2", ...]
@@ -303,16 +305,361 @@ def get_interests():
             reader = csv.DictReader(f)
             for row in reader:
                 interests.append(row['interest'])
-        
+
         return jsonify({
             "interests": interests
         }), 200
-        
+
     except Exception as e:
         logger.error(f"Error loading interests: {str(e)}")
         return jsonify({
             "error": str(e)
         }), 500
+
+
+@app.route('/api/match-with-mocks', methods=['POST'])
+def match_with_mocks():
+    """
+    Match a student with mock mentors using the backend matching algorithm.
+    Uses mock data to bypass database, perfect for testing frontend integration.
+
+    Request body:
+    {
+        "student": {
+            "firstName": "John",
+            "lastName": "Doe",
+            "education_level": "university" or "high_school" or "middle_school",
+            "city": "Stockholm",
+            "postcode": "11122",
+            "interests": ["Technology", "Gaming"],
+            "languages": ["Swedish", "English"],
+            "subjects": ["Mathematics", "Science"],
+            "talkAboutYourself": "I like to listen to Taylor Swift songs...",
+            "goals": "I want to learn software engineering",
+            "meetingPref": "online" or "in_person" or "either"
+        }
+    }
+
+    Response:
+    {
+        "success": true,
+        "matches": [
+            {
+                "mentor_id": "mentor-1",
+                "score": 85,
+                "mentor": {...mentor details...}
+            }
+        ]
+    }
+    """
+    try:
+        from mock_mentors import get_mock_mentors
+
+        # Validate request
+        if not request.is_json:
+            return jsonify({
+                "success": False,
+                "error": "Content-Type must be application/json"
+            }), 400
+
+        data = request.get_json()
+
+        if 'student' not in data:
+            return jsonify({
+                "success": False,
+                "error": "Missing required field: student"
+            }), 400
+
+        student_data = data['student']
+
+        # Transform frontend format to backend format
+        def normalize_interests(interests):
+            """Remove emojis from interests"""
+            import re
+            return [re.sub(r'[\U0001F300-\U0001F9FF]|[\u2600-\u26FF]|[\u2700-\u27BF]', '', interest).strip()
+                    for interest in interests]
+
+        # Normalize education level
+        education_map = {
+            'middle_school': 'Middle school',
+            'high_school': 'High school',
+            'university': 'University'
+        }
+
+        # Normalize meeting preference
+        meeting_map = {
+            'online': 'Online',
+            'in_person': 'In person',
+            'either': 'Both'
+        }
+
+        backend_student = {
+            "education_level": education_map.get(student_data.get('educationLevel', '').lower(),
+                                                  student_data.get('educationLevel', 'University')),
+            "postcode": student_data.get('postcode', '11122'),
+            "city": student_data.get('city', 'Stockholm'),
+            "interests": normalize_interests(student_data.get('interests', [])),
+            "languages": student_data.get('languages', []),
+            "meeting_preference": meeting_map.get(student_data.get('meetingPref', '').lower(), 'Both'),
+            "bio": student_data.get('talkAboutYourself', ''),
+            "goals": student_data.get('goals', ''),
+            "subjects": normalize_interests(student_data.get('subjects', []))
+        }
+
+        logger.info(f"Received match request from frontend: {backend_student.get('education_level')}, Interests: {backend_student.get('interests')}")
+
+        # Get mock mentors
+        mock_mentors = get_mock_mentors()
+
+        # Execute matching workflow
+        matching_request = {
+            "student": backend_student,
+            "mentors": mock_mentors
+        }
+
+        result = asyncio.run(execute_matching_workflow(matching_request))
+
+        if result['success']:
+            # Enhance matches with full mentor details
+            matches_with_details = []
+            for match in result['suggest']:
+                mentor_id = match['mentor_id']
+                mentor = next((m for m in mock_mentors if m['id'] == mentor_id), None)
+                if mentor:
+                    matches_with_details.append({
+                        **match,
+                        "mentor": mentor
+                    })
+
+            logger.info(f"Successfully matched student, found {len(matches_with_details)} matches")
+            return jsonify({
+                "success": True,
+                "matches": matches_with_details
+            }), 200
+        else:
+            logger.error(f"Matching workflow execution failed: {result.get('error')}")
+            return jsonify({
+                "success": False,
+                "error": result.get('error', 'Unknown error occurred'),
+                "matches": []
+            }), 500
+
+    except Exception as e:
+        logger.error(f"Error in match_with_mocks endpoint: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "matches": []
+        }), 500
+
+
+# Initialize email service
+email_service = EmailService(Config.SMTP_USER, Config.SMTP_PASSWORD)
+
+
+@app.route('/api/send-invite-email', methods=['POST'])
+def send_invite_email():
+    """
+    Send invitation email to mentor.
+    
+    Request body:
+    {
+        "invite_id": "uuid",
+        "student_id": "uuid", 
+        "mentor_id": "uuid",
+        "match_score": 85,
+        "reasons": ["reason1", "reason2"]
+    }
+    """
+    try:
+        if not request.is_json:
+            return jsonify({"success": False, "error": "Content-Type must be application/json"}), 400
+        
+        data = request.get_json()
+        
+        # Validate required fields
+        required = ['invite_id', 'student_id', 'mentor_id', 'match_score', 'reasons']
+        for field in required:
+            if field not in data:
+                return jsonify({"success": False, "error": f"Missing required field: {field}"}), 400
+        
+        # This would fetch from database in production
+        # For now, mock data structure is expected from frontend
+        invite_id = data['invite_id']
+        student_data = data.get('student_data', {})
+        mentor_data = data.get('mentor_data', {})
+        match_score = data['match_score']
+        reasons = data['reasons']
+        
+        # Generate unique token
+        token = email_service.generate_token()
+        token_expires = datetime.now() + timedelta(days=30)
+        
+        # Create accept/reject URLs
+        accept_url = f"{Config.BACKEND_URL}/api/invite/accept/{token}"
+        reject_url = f"{Config.BACKEND_URL}/api/invite/reject/{token}"
+        
+        # Send email
+        success = email_service.send_invite_email(
+            mentor_email=mentor_data.get('email'),
+            mentor_name=f"{mentor_data.get('first_name')} {mentor_data.get('last_name')}",
+            student_data=student_data,
+            match_score=match_score,
+            reasons=reasons,
+            accept_url=accept_url,
+            reject_url=reject_url
+        )
+        
+        if success:
+            logger.info(f"Invite email sent successfully for invite {invite_id}")
+            return jsonify({
+                "success": True,
+                "token": token,
+                "expires_at": token_expires.isoformat()
+            }), 200
+        else:
+            return jsonify({"success": False, "error": "Failed to send email"}), 500
+            
+    except Exception as e:
+        logger.error(f"Error in send_invite_email: {str(e)}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route('/api/invite/accept/<token>', methods=['GET'])
+def accept_invite(token: str):
+    """Handle mentor accepting an invite via email link"""
+    try:
+        # In production, this would:
+        # 1. Validate token from database
+        # 2. Check expiration
+        # 3. Update invite status
+        # 4. Send notification to student
+        # 5. Redirect to confirmation page
+        
+        logger.info(f"Invite accepted via token: {token}")
+        
+        # For now, return success page HTML
+        return '''
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Match Accepted</title>
+            <style>
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                    margin: 0;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                }
+                .card {
+                    background: white;
+                    padding: 40px;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+                    text-align: center;
+                    max-width: 500px;
+                }
+                h1 { color: #10b981; margin: 0 0 20px 0; }
+                p { color: #4b5563; line-height: 1.6; }
+                .emoji { font-size: 48px; margin-bottom: 20px; }
+                a {
+                    display: inline-block;
+                    margin-top: 20px;
+                    padding: 12px 24px;
+                    background: #667eea;
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 6px;
+                    font-weight: 600;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="card">
+                <div class="emoji">🎉</div>
+                <h1>Match Accepted!</h1>
+                <p>Thank you for accepting this mentorship match. The student has been notified and will reach out to you soon to schedule your first meeting.</p>
+                <a href="http://localhost:8080">Go to Platform</a>
+            </div>
+        </body>
+        </html>
+        ''', 200
+        
+    except Exception as e:
+        logger.error(f"Error accepting invite: {str(e)}")
+        return f"Error: {str(e)}", 500
+
+
+@app.route('/api/invite/reject/<token>', methods=['GET'])
+def reject_invite(token: str):
+    """Handle mentor declining an invite via email link"""
+    try:
+        # In production, this would:
+        # 1. Validate token from database
+        # 2. Check expiration
+        # 3. Update invite status to rejected
+        # 4. Send notification to student
+        # 5. Redirect to confirmation page
+        
+        logger.info(f"Invite rejected via token: {token}")
+        
+        # For now, return confirmation page HTML
+        return '''
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Match Declined</title>
+            <style>
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                    margin: 0;
+                    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+                }
+                .card {
+                    background: white;
+                    padding: 40px;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+                    text-align: center;
+                    max-width: 500px;
+                }
+                h1 { color: #6b7280; margin: 0 0 20px 0; }
+                p { color: #4b5563; line-height: 1.6; }
+                .emoji { font-size: 48px; margin-bottom: 20px; }
+                a {
+                    display: inline-block;
+                    margin-top: 20px;
+                    padding: 12px 24px;
+                    background: #667eea;
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 6px;
+                    font-weight: 600;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="card">
+                <div class="emoji">👋</div>
+                <h1>Match Declined</h1>
+                <p>We understand. The student has been notified. Thank you for your time, and we hope to match you with another student in the future.</p>
+                <a href="http://localhost:8080">Go to Platform</a>
+            </div>
+        </body>
+        </html>
+        ''', 200
+        
+    except Exception as e:
+        logger.error(f"Error rejecting invite: {str(e)}")
+        return f"Error: {str(e)}", 500
+
 
 if __name__ == '__main__':
     try:

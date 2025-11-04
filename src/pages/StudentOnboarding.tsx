@@ -165,67 +165,37 @@ const StudentOnboarding = () => {
       return;
     }
 
-    if (!user) {
-      toast.error("User not authenticated");
-      return;
-    }
-
     try {
-      // Validate with Zod schema
-      const validatedData = studentOnboardingSchema.parse(formData);
+      // Validate with Zod schema (if available)
+      // const validatedData = studentOnboardingSchema.parse(formData);
 
-      // Check if profile already exists
-      const { data: existingProfile } = await supabase
-        .from("students")
-        .select("id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
+      // MOCK MODE: Save student data to sessionStorage instead of database
+      // This allows us to test the backend matching API without database
       const studentData = {
-        user_id: user.id,
-        first_name: validatedData.firstName,
-        last_name: validatedData.lastName,
-        email: validatedData.email,
-        education_level: validatedData.educationLevel,
-        school: validatedData.school,
-        city: validatedData.city,
-        postcode: validatedData.postcode,
-        languages: validatedData.languages,
-        subjects: validatedData.subjects,
-        interests: validatedData.interests,
-        goals: validatedData.goals || null,
-        bio: validatedData.talkAboutYourself || null,
-        meeting_pref: validatedData.meetingPref,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        educationLevel: formData.educationLevel,
+        school: formData.school,
+        city: formData.city,
+        postcode: formData.postcode,
+        languages: formData.languages,
+        subjects: formData.subjects,
+        interests: formData.interests,
+        goals: formData.goals || "",
+        talkAboutYourself: formData.talkAboutYourself || "",
+        meetingPref: formData.meetingPref,
       };
 
-      let error;
-      if (existingProfile) {
-        // Update existing profile
-        const result = await supabase
-          .from("students")
-          .update(studentData)
-          .eq("user_id", user.id);
-        error = result.error;
-      } else {
-        // Create new profile
-        const result = await supabase
-          .from("students")
-          .insert(studentData);
-        error = result.error;
-      }
+      // Store in sessionStorage for the match page to use
+      sessionStorage.setItem('studentProfile', JSON.stringify(studentData));
 
-      if (error) throw error;
+      console.log('Saved student data to sessionStorage:', studentData);
 
-      toast.success("Profile created! Finding your matches...");
-      navigate("/match");
+      toast.success("Profile saved! Finding your matches with AI...");
+      navigate("/student-match");
     } catch (error: any) {
-      if (error.name === 'ZodError') {
-        const firstError = error.errors[0];
-        toast.error(firstError.message);
-      } else {
-        console.error("Error saving profile:", error);
-        toast.error("Failed to save profile. Please try again.");
-      }
+      console.error("Error saving profile:", error);
+      toast.error("Failed to save profile. Please try again.");
     }
   };
 
