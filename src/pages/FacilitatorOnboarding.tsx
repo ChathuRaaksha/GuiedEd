@@ -38,6 +38,7 @@ const FacilitatorOnboarding = () => {
     org: "",
     role: "",
     city: "",
+    postcode: "",
     maxMatches: "50",
     notes: "",
   });
@@ -68,6 +69,7 @@ const FacilitatorOnboarding = () => {
           org: validated.org || null,
           role: validated.role || null,
           city: validated.city,
+          postcode: validated.postcode,
           max_matches: validated.maxMatches,
           notes: validated.notes || null,
         });
@@ -180,6 +182,17 @@ const FacilitatorOnboarding = () => {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="postcode">Postcode *</Label>
+              <Input
+                id="postcode"
+                value={formData.postcode}
+                onChange={(e) => handleInputChange("postcode", e.target.value)}
+                placeholder="e.g., 123 45"
+                className="mt-1 rounded-xl"
+              />
             </div>
 
             <div>

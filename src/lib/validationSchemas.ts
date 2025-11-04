@@ -9,6 +9,7 @@ export const studentOnboardingSchema = z.object({
   }),
   school: z.string().min(1, 'School is required').max(100),
   city: z.string().min(1, 'City is required').max(100),
+  postcode: z.string().min(1, 'Postcode is required').max(20),
   languages: z.array(z.string()).min(1, 'Select at least one language'),
   subjects: z.array(z.string()).min(1, 'Select at least one subject'),
   interests: z.array(z.string()).min(1, 'Select at least one interest'),
@@ -26,6 +27,7 @@ export const mentorOnboardingSchema = z.object({
     message: 'Please select an education level',
   }).optional(),
   city: z.string().min(1, 'City is required').max(100),
+  postcode: z.string().min(1, 'Postcode is required').max(20),
   employer: z.string().max(100).optional(),
   role: z.string().max(100).optional(),
   bio: z.string().max(500, 'Bio must be less than 500 characters').optional(),
@@ -40,6 +42,7 @@ export const mentorOnboardingSchema = z.object({
   }),
   maxStudents: z.number().min(1, 'Must mentor at least 1 student').max(10, 'Maximum 10 students'),
   linkedinUrl: z.string().url('Invalid LinkedIn URL').optional().or(z.literal('')),
+  cvUrl: z.string().optional(),
 });
 
 export const facilitatorOnboardingSchema = z.object({
@@ -48,6 +51,7 @@ export const facilitatorOnboardingSchema = z.object({
   org: z.string().max(100).optional(),
   role: z.string().max(100).optional(),
   city: z.string().min(1, 'City is required').max(100),
+  postcode: z.string().min(1, 'Postcode is required').max(20),
   maxMatches: z.number().min(1).max(500).default(50),
   notes: z.string().max(500).optional(),
 });

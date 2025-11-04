@@ -84,6 +84,7 @@ const StudentOnboarding = () => {
     educationLevel: "",
     school: "",
     city: "",
+    postcode: "",
     languages: [] as string[],
     subjects: [] as string[],
     interests: [] as string[],
@@ -107,7 +108,7 @@ const StudentOnboarding = () => {
 
   const handleNext = () => {
     if (step === 1) {
-      if (!formData.firstName || !formData.lastName || !formData.educationLevel || !formData.school || !formData.city) {
+      if (!formData.firstName || !formData.lastName || !formData.educationLevel || !formData.school || !formData.city || !formData.postcode) {
         toast.error("Please fill in all required fields");
         return;
       }
@@ -148,6 +149,7 @@ const StudentOnboarding = () => {
         education_level: validatedData.educationLevel,
         school: validatedData.school,
         city: validatedData.city,
+        postcode: validatedData.postcode,
         languages: validatedData.languages,
         subjects: validatedData.subjects,
         interests: validatedData.interests,
@@ -247,6 +249,19 @@ const StudentOnboarding = () => {
                   </Select>
                 </div>
                 <div>
+                  <Label htmlFor="school">School *</Label>
+                  <Input
+                    id="school"
+                    value={formData.school}
+                    onChange={(e) => handleInputChange("school", e.target.value)}
+                    placeholder="Your school name"
+                    className="mt-1 rounded-xl"
+                  />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
                   <Label htmlFor="city">City *</Label>
                   <Select value={formData.city} onValueChange={(value) => handleInputChange("city", value)}>
                     <SelectTrigger className="mt-1 rounded-xl">
@@ -260,6 +275,16 @@ const StudentOnboarding = () => {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+                <div>
+                  <Label htmlFor="postcode">Postcode *</Label>
+                  <Input
+                    id="postcode"
+                    value={formData.postcode}
+                    onChange={(e) => handleInputChange("postcode", e.target.value)}
+                    placeholder="e.g., 123 45"
+                    className="mt-1 rounded-xl"
+                  />
                 </div>
               </div>
 

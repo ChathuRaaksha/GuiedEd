@@ -85,6 +85,7 @@ const MentorOnboarding = () => {
     email: profile?.email || "",
     educationLevel: "",
     city: "",
+    postcode: "",
     employer: "",
     role: "",
     bio: "",
@@ -96,6 +97,8 @@ const MentorOnboarding = () => {
     maxStudents: "3",
     linkedinUrl: "",
   });
+  const [cvFile, setCvFile] = useState<File | null>(null);
+  const [uploadingCv, setUploadingCv] = useState(false);
 
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -117,10 +120,33 @@ const MentorOnboarding = () => {
     }
 
     try {
+      let cvUrl = "";
+      
+      // Upload CV if provided
+      if (cvFile) {
+        setUploadingCv(true);
+        const fileExt = cvFile.name.split('.').pop();
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('cvs')
+          .upload(fileName, cvFile);
+        
+        if (uploadError) throw uploadError;
+        
+        const { data: { publicUrl } } = supabase.storage
+          .from('cvs')
+          .getPublicUrl(fileName);
+        
+        cvUrl = publicUrl;
+        setUploadingCv(false);
+      }
+
       const validated = mentorOnboardingSchema.parse({
         ...formData,
         maxStudents: parseInt(formData.maxStudents),
         email: profile?.email || formData.email,
+        cvUrl: cvUrl || undefined,
       });
 
       const { error } = await supabase
@@ -132,6 +158,7 @@ const MentorOnboarding = () => {
           email: validated.email,
           education_level: validated.educationLevel || null,
           city: validated.city,
+          postcode: validated.postcode,
           employer: validated.employer || null,
           role: validated.role || null,
           bio: validated.bio || null,
@@ -142,6 +169,7 @@ const MentorOnboarding = () => {
           meeting_pref: validated.meetingPref,
           max_students: validated.maxStudents,
           linkedin_url: validated.linkedinUrl || null,
+          cv_url: cvUrl || null,
         });
 
       if (error) throw error;
@@ -152,6 +180,7 @@ const MentorOnboarding = () => {
       }, 1500);
     } catch (error: any) {
       console.error("Error creating mentor profile:", error);
+      setUploadingCv(false);
       if (error.name === 'ZodError') {
         toast.error(error.issues[0].message);
       } else {
@@ -222,6 +251,20 @@ const MentorOnboarding = () => {
                     </Select>
                   </div>
                   <div>
+                    <Label htmlFor="linkedinUrl">LinkedIn URL</Label>
+                    <Input
+                      id="linkedinUrl"
+                      type="url"
+                      value={formData.linkedinUrl}
+                      onChange={(e) => handleInputChange("linkedinUrl", e.target.value)}
+                      placeholder="https://linkedin.com/in/yourprofile"
+                      className="mt-1 rounded-xl"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
                     <Label htmlFor="city">City *</Label>
                     <Select value={formData.city} onValueChange={(value) => handleInputChange("city", value)}>
                       <SelectTrigger className="mt-1 rounded-xl">
@@ -235,6 +278,16 @@ const MentorOnboarding = () => {
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="postcode">Postcode *</Label>
+                    <Input
+                      id="postcode"
+                      value={formData.postcode}
+                      onChange={(e) => handleInputChange("postcode", e.target.value)}
+                      placeholder="e.g., 123 45"
+                      className="mt-1 rounded-xl"
+                    />
                   </div>
                 </div>
 
@@ -274,15 +327,33 @@ const MentorOnboarding = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="linkedinUrl">LinkedIn URL</Label>
-                  <Input
-                    id="linkedinUrl"
-                    type="url"
-                    value={formData.linkedinUrl}
-                    onChange={(e) => handleInputChange("linkedinUrl", e.target.value)}
-                    placeholder="https://linkedin.com/in/yourprofile"
-                    className="mt-1 rounded-xl"
-                  />
+                  <Label htmlFor="cv">Upload CV (Optional)</Label>
+                  <div className="mt-1">
+                    <Input
+                      id="cv"
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          if (file.size > 5 * 1024 * 1024) {
+                            toast.error("File size must be less than 5MB");
+                            e.target.value = "";
+                            return;
+                          }
+                          setCvFile(file);
+                          toast.success("CV selected successfully");
+                        }
+                      }}
+                      className="rounded-xl cursor-pointer"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      PDF, DOC, or DOCX format. Max 5MB
+                    </p>
+                    {cvFile && (
+                      <p className="text-sm text-primary mt-2">✓ {cvFile.name}</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -467,8 +538,12 @@ const MentorOnboarding = () => {
               </div>
             </div>
 
-            <Button onClick={handleSubmit} className="btn-primary w-full h-14 text-lg">
-              Complete Mentor Profile
+            <Button 
+              onClick={handleSubmit} 
+              className="btn-primary w-full h-14 text-lg"
+              disabled={uploadingCv}
+            >
+              {uploadingCv ? "Uploading CV..." : "Complete Mentor Profile"}
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
           </div>

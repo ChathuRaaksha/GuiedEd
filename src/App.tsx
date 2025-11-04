@@ -12,6 +12,7 @@ import StudentOnboarding from "./pages/StudentOnboarding";
 import MentorOnboarding from "./pages/MentorOnboarding";
 import FacilitatorOnboarding from "./pages/FacilitatorOnboarding";
 import Match from "./pages/Match";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +57,14 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={['STUDENT']}>
                   <Match />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
                 </ProtectedRoute>
               }
             />

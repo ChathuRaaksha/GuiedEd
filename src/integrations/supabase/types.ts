@@ -24,6 +24,7 @@ export type Database = {
           name: string
           notes: string | null
           org: string | null
+          postcode: string | null
           role: string | null
           updated_at: string
           user_id: string | null
@@ -37,6 +38,7 @@ export type Database = {
           name: string
           notes?: string | null
           org?: string | null
+          postcode?: string | null
           role?: string | null
           updated_at?: string
           user_id?: string | null
@@ -50,6 +52,7 @@ export type Database = {
           name?: string
           notes?: string | null
           org?: string | null
+          postcode?: string | null
           role?: string | null
           updated_at?: string
           user_id?: string | null
@@ -167,6 +170,7 @@ export type Database = {
           bio: string | null
           city: string | null
           created_at: string
+          cv_url: string | null
           education_level: string | null
           email: string
           employer: string | null
@@ -177,6 +181,7 @@ export type Database = {
           last_name: string
           max_students: number
           meeting_pref: string
+          postcode: string | null
           role: string | null
           skills: string[]
           updated_at: string
@@ -188,6 +193,7 @@ export type Database = {
           bio?: string | null
           city?: string | null
           created_at?: string
+          cv_url?: string | null
           education_level?: string | null
           email: string
           employer?: string | null
@@ -198,6 +204,7 @@ export type Database = {
           last_name: string
           max_students?: number
           meeting_pref?: string
+          postcode?: string | null
           role?: string | null
           skills?: string[]
           updated_at?: string
@@ -209,6 +216,7 @@ export type Database = {
           bio?: string | null
           city?: string | null
           created_at?: string
+          cv_url?: string | null
           education_level?: string | null
           email?: string
           employer?: string | null
@@ -219,6 +227,7 @@ export type Database = {
           last_name?: string
           max_students?: number
           meeting_pref?: string
+          postcode?: string | null
           role?: string | null
           skills?: string[]
           updated_at?: string
@@ -276,6 +285,7 @@ export type Database = {
           languages: string[]
           last_name: string
           meeting_pref: string
+          postcode: string | null
           school: string | null
           subjects: string[] | null
           updated_at: string
@@ -295,6 +305,7 @@ export type Database = {
           languages?: string[]
           last_name: string
           meeting_pref?: string
+          postcode?: string | null
           school?: string | null
           subjects?: string[] | null
           updated_at?: string
@@ -314,6 +325,7 @@ export type Database = {
           languages?: string[]
           last_name?: string
           meeting_pref?: string
+          postcode?: string | null
           school?: string | null
           subjects?: string[] | null
           updated_at?: string

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Users, Sparkles, Heart, CheckCircle, LogOut } from "lucide-react";
+import { ArrowRight, Users, Sparkles, Heart, CheckCircle, LogOut, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import logo from "@/assets/logo.png";
@@ -16,6 +16,16 @@ const Landing = () => {
           <nav className="hidden md:flex items-center gap-6">
             {user && profile ? (
               <>
+                <Link to="/profile">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="gap-2"
+                  >
+                    <User className="w-4 h-4" />
+                    Profile
+                  </Button>
+                </Link>
                 <span className="text-sm font-medium px-4 py-2 rounded-full bg-primary/10 text-primary">
                   {profile.role}
                 </span>
