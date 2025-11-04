@@ -184,6 +184,7 @@ export type Database = {
           postcode: string | null
           role: string | null
           skills: string[]
+          talk_about_yourself: string | null
           updated_at: string
           user_id: string | null
         }
@@ -207,6 +208,7 @@ export type Database = {
           postcode?: string | null
           role?: string | null
           skills?: string[]
+          talk_about_yourself?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -230,6 +232,7 @@ export type Database = {
           postcode?: string | null
           role?: string | null
           skills?: string[]
+          talk_about_yourself?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -273,6 +276,7 @@ export type Database = {
       students: {
         Row: {
           availability: string[] | null
+          bio: string | null
           city: string | null
           created_at: string
           education_level: string
@@ -293,6 +297,7 @@ export type Database = {
         }
         Insert: {
           availability?: string[] | null
+          bio?: string | null
           city?: string | null
           created_at?: string
           education_level?: string
@@ -313,6 +318,7 @@ export type Database = {
         }
         Update: {
           availability?: string[] | null
+          bio?: string | null
           city?: string | null
           created_at?: string
           education_level?: string

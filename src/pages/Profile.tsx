@@ -210,6 +210,13 @@ const Profile = () => {
                   <p className="text-muted-foreground">{profileData.goals}</p>
                 </Card>
               )}
+
+              {profileData.bio && (
+                <Card className="p-6 mb-6">
+                  <h2 className="text-xl font-bold mb-4">About Me</h2>
+                  <p className="text-muted-foreground">{profileData.bio}</p>
+                </Card>
+              )}
             </>
           )}
 
@@ -246,6 +253,13 @@ const Profile = () => {
                 <Card className="p-6 mb-6">
                   <h2 className="text-xl font-bold mb-4">About Me</h2>
                   <p className="text-muted-foreground">{profileData.bio}</p>
+                </Card>
+              )}
+
+              {profileData.talk_about_yourself && (
+                <Card className="p-6 mb-6">
+                  <h2 className="text-xl font-bold mb-4">Personal Story</h2>
+                  <p className="text-muted-foreground">{profileData.talk_about_yourself}</p>
                 </Card>
               )}
 
