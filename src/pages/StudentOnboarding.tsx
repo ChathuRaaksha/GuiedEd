@@ -8,7 +8,22 @@ import { ArrowRight, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { studentOnboardingSchema } from "@/lib/validationSchemas";
 import logo from "@/assets/logo.png";
+
+const SUBJECT_OPTIONS = [
+  "Mathematics",
+  "Science",
+  "Technology",
+  "Engineering",
+  "English",
+  "History",
+  "Geography",
+  "Art",
+  "Music",
+  "Physical Education",
+];
 
 const INTEREST_OPTIONS = [
   "💻 Technology",
@@ -36,15 +51,17 @@ const LANGUAGE_OPTIONS = [
 
 const StudentOnboarding = () => {
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    email: "",
+    email: profile?.email || "",
     grade: "",
     school: "",
     city: "",
     languages: [] as string[],
+    subjects: [] as string[],
     interests: [] as string[],
     goals: "",
     meetingPref: "online",
@@ -55,7 +72,7 @@ const StudentOnboarding = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const toggleArrayItem = (field: "languages" | "interests", value: string) => {
+  const toggleArrayItem = (field: "languages" | "subjects" | "interests", value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: prev[field].includes(value)
@@ -66,14 +83,14 @@ const StudentOnboarding = () => {
 
   const handleNext = () => {
     if (step === 1) {
-      if (!formData.firstName || !formData.lastName || !formData.email || !formData.grade) {
+      if (!formData.firstName || !formData.lastName || !formData.grade || !formData.school || !formData.city) {
         toast.error("Please fill in all required fields");
         return;
       }
     }
     if (step === 2) {
-      if (formData.languages.length === 0 || formData.interests.length === 0) {
-        toast.error("Please select at least one language and interest");
+      if (formData.languages.length === 0 || formData.subjects.length === 0 || formData.interests.length === 0) {
+        toast.error("Please select at least one language, subject, and interest");
         return;
       }
     }
@@ -90,20 +107,33 @@ const StudentOnboarding = () => {
       return;
     }
 
+    if (!user) {
+      toast.error("You must be logged in to continue");
+      return;
+    }
+
     try {
+      const validated = studentOnboardingSchema.parse({
+        ...formData,
+        grade: parseInt(formData.grade),
+        email: profile?.email || formData.email,
+      });
+
       const { data, error } = await supabase
         .from("students")
         .insert({
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          email: formData.email,
-          grade: parseInt(formData.grade),
-          school: formData.school || null,
-          city: formData.city || null,
-          languages: formData.languages,
-          interests: formData.interests,
-          goals: formData.goals || null,
-          meeting_pref: formData.meetingPref,
+          user_id: user.id,
+          first_name: validated.firstName,
+          last_name: validated.lastName,
+          email: validated.email,
+          grade: validated.grade,
+          school: validated.school,
+          city: validated.city,
+          languages: validated.languages,
+          subjects: validated.subjects,
+          interests: validated.interests,
+          goals: validated.goals || null,
+          meeting_pref: validated.meetingPref,
         })
         .select()
         .single();
@@ -116,7 +146,11 @@ const StudentOnboarding = () => {
       }, 1500);
     } catch (error: any) {
       console.error("Error creating student profile:", error);
-      toast.error(error.message || "Failed to create profile. Please try again.");
+      if (error.name === 'ZodError') {
+        toast.error(error.issues[0].message);
+      } else {
+        toast.error(error.message || "Failed to create profile. Please try again.");
+      }
     }
   };
 
@@ -165,7 +199,7 @@ const StudentOnboarding = () => {
                     value={formData.firstName}
                     onChange={(e) => handleInputChange("firstName", e.target.value)}
                     placeholder="Enter your first name"
-                    className="mt-1"
+                    className="mt-1 rounded-xl"
                   />
                 </div>
                 <div>
@@ -175,55 +209,45 @@ const StudentOnboarding = () => {
                     value={formData.lastName}
                     onChange={(e) => handleInputChange("lastName", e.target.value)}
                     placeholder="Enter your last name"
-                    className="mt-1"
+                    className="mt-1 rounded-xl"
                   />
                 </div>
-              </div>
-
-              <div>
-                <Label htmlFor="email">Email *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
-                  placeholder="your.email@example.com"
-                  className="mt-1"
-                />
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="grade">Grade *</Label>
+                  <Label htmlFor="grade">Grade (8 or 9) *</Label>
                   <Input
                     id="grade"
                     type="number"
+                    min="8"
+                    max="9"
                     value={formData.grade}
                     onChange={(e) => handleInputChange("grade", e.target.value)}
-                    placeholder="e.g., 10"
-                    className="mt-1"
+                    placeholder="8 or 9"
+                    className="mt-1 rounded-xl"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="school">School</Label>
+                  <Label htmlFor="city">City *</Label>
                   <Input
-                    id="school"
-                    value={formData.school}
-                    onChange={(e) => handleInputChange("school", e.target.value)}
-                    placeholder="Your school name"
-                    className="mt-1"
+                    id="city"
+                    value={formData.city}
+                    onChange={(e) => handleInputChange("city", e.target.value)}
+                    placeholder="Where do you live?"
+                    className="mt-1 rounded-xl"
                   />
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="city">City</Label>
+                <Label htmlFor="school">School *</Label>
                 <Input
-                  id="city"
-                  value={formData.city}
-                  onChange={(e) => handleInputChange("city", e.target.value)}
-                  placeholder="Where do you live?"
-                  className="mt-1"
+                  id="school"
+                  value={formData.school}
+                  onChange={(e) => handleInputChange("school", e.target.value)}
+                  placeholder="Your school name"
+                  className="mt-1 rounded-xl"
                 />
               </div>
 
@@ -250,8 +274,9 @@ const StudentOnboarding = () => {
                   {LANGUAGE_OPTIONS.map((lang) => (
                     <button
                       key={lang}
+                      type="button"
                       onClick={() => toggleArrayItem("languages", lang)}
-                      className={`tag-chip ${
+                      className={`tag-chip transition-all ${
                         formData.languages.includes(lang)
                           ? "bg-accent text-accent-foreground"
                           : ""
@@ -264,13 +289,34 @@ const StudentOnboarding = () => {
               </div>
 
               <div>
+                <Label className="mb-3 block">Favorite school subjects *</Label>
+                <div className="flex flex-wrap gap-2">
+                  {SUBJECT_OPTIONS.map((subject) => (
+                    <button
+                      key={subject}
+                      type="button"
+                      onClick={() => toggleArrayItem("subjects", subject)}
+                      className={`tag-chip transition-all ${
+                        formData.subjects.includes(subject)
+                          ? "bg-primary text-primary-foreground"
+                          : ""
+                      }`}
+                    >
+                      {subject}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
                 <Label className="mb-3 block">What are you interested in? *</Label>
                 <div className="flex flex-wrap gap-2">
                   {INTEREST_OPTIONS.map((interest) => (
                     <button
                       key={interest}
+                      type="button"
                       onClick={() => toggleArrayItem("interests", interest)}
-                      className={`tag-chip ${
+                      className={`tag-chip transition-all ${
                         formData.interests.includes(interest)
                           ? "bg-primary text-primary-foreground"
                           : ""
@@ -289,12 +335,13 @@ const StudentOnboarding = () => {
                   value={formData.goals}
                   onChange={(e) => handleInputChange("goals", e.target.value)}
                   placeholder="Tell me what you want to achieve... (e.g., explore careers in tech, improve leadership skills)"
-                  className="mt-1 min-h-[100px]"
+                  className="mt-1 min-h-[100px] rounded-xl"
+                  maxLength={500}
                 />
               </div>
 
               <div className="flex gap-4">
-                <Button onClick={handleBack} variant="outline" className="flex-1">
+                <Button onClick={handleBack} variant="outline" className="flex-1 rounded-xl">
                   <ArrowLeft className="mr-2 w-4 h-4" />
                   Back
                 </Button>
@@ -320,37 +367,40 @@ const StudentOnboarding = () => {
                 <Label className="mb-3 block">How would you like to meet?</Label>
                 <div className="flex gap-4">
                   <button
+                    type="button"
                     onClick={() => handleInputChange("meetingPref", "online")}
                     className={`flex-1 p-4 rounded-2xl border-2 transition-all ${
                       formData.meetingPref === "online"
                         ? "border-primary bg-primary/5"
-                        : "border-border"
+                        : "border-border hover:border-primary/50"
                     }`}
                   >
                     <div className="text-2xl mb-2">💻</div>
                     <div className="font-medium">Online</div>
                   </button>
                   <button
-                    onClick={() => handleInputChange("meetingPref", "in-person")}
+                    type="button"
+                    onClick={() => handleInputChange("meetingPref", "in_person")}
                     className={`flex-1 p-4 rounded-2xl border-2 transition-all ${
-                      formData.meetingPref === "in-person"
+                      formData.meetingPref === "in_person"
                         ? "border-primary bg-primary/5"
-                        : "border-border"
+                        : "border-border hover:border-primary/50"
                     }`}
                   >
                     <div className="text-2xl mb-2">🤝</div>
                     <div className="font-medium">In Person</div>
                   </button>
                   <button
-                    onClick={() => handleInputChange("meetingPref", "both")}
+                    type="button"
+                    onClick={() => handleInputChange("meetingPref", "either")}
                     className={`flex-1 p-4 rounded-2xl border-2 transition-all ${
-                      formData.meetingPref === "both"
+                      formData.meetingPref === "either"
                         ? "border-primary bg-primary/5"
-                        : "border-border"
+                        : "border-border hover:border-primary/50"
                     }`}
                   >
                     <div className="text-2xl mb-2">✨</div>
-                    <div className="font-medium">Both</div>
+                    <div className="font-medium">Either</div>
                   </button>
                 </div>
               </div>
@@ -373,7 +423,7 @@ const StudentOnboarding = () => {
               </div>
 
               <div className="flex gap-4">
-                <Button onClick={handleBack} variant="outline" className="flex-1">
+                <Button onClick={handleBack} variant="outline" className="flex-1 rounded-xl">
                   <ArrowLeft className="mr-2 w-4 h-4" />
                   Back
                 </Button>
