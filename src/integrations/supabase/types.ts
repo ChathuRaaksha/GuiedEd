@@ -28,7 +28,7 @@ export type Database = {
           postcode: string | null
           role: string
           updated_at: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           city?: string | null
@@ -43,7 +43,7 @@ export type Database = {
           postcode?: string | null
           role: string
           updated_at?: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           city?: string | null
@@ -58,7 +58,7 @@ export type Database = {
           postcode?: string | null
           role?: string
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -191,7 +191,7 @@ export type Database = {
           skills: string[]
           talk_about_yourself: string | null
           updated_at: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           age_pref?: string | null
@@ -217,7 +217,7 @@ export type Database = {
           skills?: string[]
           talk_about_yourself?: string | null
           updated_at?: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           age_pref?: string | null
@@ -243,7 +243,7 @@ export type Database = {
           skills?: string[]
           talk_about_yourself?: string | null
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -302,7 +302,7 @@ export type Database = {
           school: string | null
           subjects: string[] | null
           updated_at: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           availability?: string[] | null
@@ -323,7 +323,7 @@ export type Database = {
           school?: string | null
           subjects?: string[] | null
           updated_at?: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           availability?: string[] | null
@@ -344,7 +344,7 @@ export type Database = {
           school?: string | null
           subjects?: string[] | null
           updated_at?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
