@@ -179,29 +179,50 @@ const MentorOnboarding = () => {
         cvUrl: cvUrl || undefined,
       });
 
-      const { error } = await supabase
+      // Check if profile already exists
+      const { data: existingProfile } = await supabase
         .from("mentors")
-        .insert({
-          user_id: user.id,
-          first_name: validated.firstName,
-          last_name: validated.lastName,
-          email: validated.email,
-          education_level: validated.educationLevel || null,
-          city: validated.city,
-          postcode: validated.postcode,
-          employer: validated.employer || null,
-          role: validated.role || null,
-          bio: validated.bio || null,
-          talk_about_yourself: validated.talkAboutYourself || null,
-          skills: validated.skills,
-          hobbies: validated.hobbies || [],
-          languages: validated.languages,
-          age_pref: validated.agePref,
-          meeting_pref: validated.meetingPref,
-          max_students: validated.maxStudents,
-          linkedin_url: validated.linkedinUrl || null,
-          cv_url: cvUrl || null,
-        });
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const mentorData = {
+        user_id: user.id,
+        first_name: validated.firstName,
+        last_name: validated.lastName,
+        email: validated.email,
+        education_level: validated.educationLevel || null,
+        city: validated.city,
+        postcode: validated.postcode,
+        employer: validated.employer || null,
+        role: validated.role || null,
+        bio: validated.bio || null,
+        talk_about_yourself: validated.talkAboutYourself || null,
+        skills: validated.skills,
+        hobbies: validated.hobbies || [],
+        languages: validated.languages,
+        age_pref: validated.agePref,
+        meeting_pref: validated.meetingPref,
+        max_students: validated.maxStudents,
+        linkedin_url: validated.linkedinUrl || null,
+        cv_url: cvUrl || null,
+      };
+
+      let error;
+      if (existingProfile) {
+        // Update existing profile
+        const result = await supabase
+          .from("mentors")
+          .update(mentorData)
+          .eq("user_id", user.id);
+        error = result.error;
+      } else {
+        // Create new profile
+        const result = await supabase
+          .from("mentors")
+          .insert(mentorData);
+        error = result.error;
+      }
 
       if (error) throw error;
 

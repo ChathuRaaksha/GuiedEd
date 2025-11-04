@@ -174,7 +174,14 @@ const StudentOnboarding = () => {
       // Validate with Zod schema
       const validatedData = studentOnboardingSchema.parse(formData);
 
-      const { error } = await supabase.from("students").insert({
+      // Check if profile already exists
+      const { data: existingProfile } = await supabase
+        .from("students")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const studentData = {
         user_id: user.id,
         first_name: validatedData.firstName,
         last_name: validatedData.lastName,
@@ -189,7 +196,23 @@ const StudentOnboarding = () => {
         goals: validatedData.goals || null,
         bio: validatedData.talkAboutYourself || null,
         meeting_pref: validatedData.meetingPref,
-      });
+      };
+
+      let error;
+      if (existingProfile) {
+        // Update existing profile
+        const result = await supabase
+          .from("students")
+          .update(studentData)
+          .eq("user_id", user.id);
+        error = result.error;
+      } else {
+        // Create new profile
+        const result = await supabase
+          .from("students")
+          .insert(studentData);
+        error = result.error;
+      }
 
       if (error) throw error;
 

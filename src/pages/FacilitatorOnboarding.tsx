@@ -61,20 +61,41 @@ const FacilitatorOnboarding = () => {
         email: profile?.email || formData.email,
       });
 
-      const { error } = await supabase
+      // Check if profile already exists
+      const { data: existingProfile } = await supabase
         .from("facilitators")
-        .insert({
-          user_id: user.id,
-          first_name: validated.firstName,
-          last_name: validated.lastName,
-          email: validated.email,
-          org: validated.org,
-          role: validated.role,
-          city: validated.city,
-          postcode: validated.postcode,
-          max_matches: validated.maxMatches,
-          notes: validated.notes || null,
-        });
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const facilitatorData = {
+        user_id: user.id,
+        first_name: validated.firstName,
+        last_name: validated.lastName,
+        email: validated.email,
+        org: validated.org,
+        role: validated.role,
+        city: validated.city,
+        postcode: validated.postcode,
+        max_matches: validated.maxMatches,
+        notes: validated.notes || null,
+      };
+
+      let error;
+      if (existingProfile) {
+        // Update existing profile
+        const result = await supabase
+          .from("facilitators")
+          .update(facilitatorData)
+          .eq("user_id", user.id);
+        error = result.error;
+      } else {
+        // Create new profile
+        const result = await supabase
+          .from("facilitators")
+          .insert(facilitatorData);
+        error = result.error;
+      }
 
       if (error) throw error;
 
