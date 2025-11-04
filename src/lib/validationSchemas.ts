@@ -24,7 +24,7 @@ export const mentorOnboardingSchema = z.object({
   firstName: z.string().min(1, 'First name is required').max(50),
   lastName: z.string().min(1, 'Last name is required').max(50),
   email: z.string().email('Invalid email address').max(255),
-  educationLevel: z.string().refine(val => ['middle_school', 'high_school', 'university'].includes(val), {
+  educationLevel: z.string().refine(val => ['high_school', 'bachelor', 'master', 'phd'].includes(val), {
     message: 'Please select an education level',
   }).optional(),
   city: z.string().min(1, 'City is required').max(100),
