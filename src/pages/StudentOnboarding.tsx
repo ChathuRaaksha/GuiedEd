@@ -14,49 +14,49 @@ import { studentOnboardingSchema } from "@/lib/validationSchemas";
 import logo from "@/assets/logo.png";
 
 const SUBJECT_OPTIONS = [
-  "Mathematics",
-  "Science",
-  "Technology",
-  "Engineering",
-  "English",
-  "History",
-  "Geography",
-  "Art",
-  "Music",
-  "Physical Education",
+  "🔢 Mathematics",
+  "🔬 Science",
+  "💻 Technology",
+  "⚙️ Engineering",
+  "📖 English",
+  "📜 History",
+  "🌍 Geography",
+  "🎨 Art",
+  "🎵 Music",
+  "🏃 Physical Education",
 ];
 
 const INTEREST_OPTIONS = [
-  "News",
-  "Sports",
-  "Music",
-  "Dance",
-  "Celebrity",
-  "Relationships",
-  "Movies & TV",
-  "Technology",
-  "Business & Finance",
-  "Cryptocurrency",
-  "Career",
-  "Gaming",
-  "Health & Fitness",
-  "Travel",
-  "Food",
-  "Beauty",
-  "Fashion",
-  "Nature & Outdoors",
-  "Pets",
-  "Home & Garden",
-  "Art",
-  "Anime",
-  "Memes",
-  "Education",
-  "Science",
-  "Religion",
-  "Shopping",
-  "Cars",
-  "Aviation",
-  "Motorcycles",
+  "📰 News",
+  "⚽ Sports",
+  "🎵 Music",
+  "💃 Dance",
+  "⭐ Celebrity",
+  "💑 Relationships",
+  "🎬 Movies & TV",
+  "💻 Technology",
+  "💼 Business & Finance",
+  "🪙 Cryptocurrency",
+  "🎯 Career",
+  "🎮 Gaming",
+  "💪 Health & Fitness",
+  "✈️ Travel",
+  "🍕 Food",
+  "💄 Beauty",
+  "👗 Fashion",
+  "🌲 Nature & Outdoors",
+  "🐾 Pets",
+  "🏡 Home & Garden",
+  "🎨 Art",
+  "🎌 Anime",
+  "😂 Memes",
+  "📚 Education",
+  "🔬 Science",
+  "🕊️ Religion",
+  "🛍️ Shopping",
+  "🚗 Cars",
+  "✈️ Aviation",
+  "🏍️ Motorcycles",
 ];
 
 const LANGUAGE_OPTIONS = [
@@ -360,30 +360,6 @@ const StudentOnboarding = () => {
               </div>
 
               <div>
-                <Label htmlFor="talkAboutYourself">Talk about yourself</Label>
-                <Textarea
-                  id="talkAboutYourself"
-                  value={formData.talkAboutYourself}
-                  onChange={(e) => handleInputChange("talkAboutYourself", e.target.value)}
-                  placeholder="Share something about yourself... (e.g., your hobbies, what you enjoy doing)"
-                  className="mt-1 min-h-[100px] rounded-xl"
-                  maxLength={500}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="goals">What are your goals?</Label>
-                <Textarea
-                  id="goals"
-                  value={formData.goals}
-                  onChange={(e) => handleInputChange("goals", e.target.value)}
-                  placeholder="Tell me what you want to achieve... (e.g., explore careers in tech, improve leadership skills)"
-                  className="mt-1 min-h-[100px] rounded-xl"
-                  maxLength={500}
-                />
-              </div>
-
-              <div>
                 <Label className="mb-3 block">What are you interested in? *</Label>
                 <div className="flex flex-wrap gap-2">
                   {INTEREST_OPTIONS.map((interest) => (
@@ -421,6 +397,30 @@ const StudentOnboarding = () => {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              <div>
+                <Label htmlFor="talkAboutYourself">Talk about yourself</Label>
+                <Textarea
+                  id="talkAboutYourself"
+                  value={formData.talkAboutYourself}
+                  onChange={(e) => handleInputChange("talkAboutYourself", e.target.value)}
+                  placeholder="Share something about yourself... (e.g., your hobbies, what you enjoy doing)"
+                  className="mt-1 min-h-[100px] rounded-xl"
+                  maxLength={500}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="goals">What are your goals?</Label>
+                <Textarea
+                  id="goals"
+                  value={formData.goals}
+                  onChange={(e) => handleInputChange("goals", e.target.value)}
+                  placeholder="Tell me what you want to achieve... (e.g., explore careers in tech, improve leadership skills)"
+                  className="mt-1 min-h-[100px] rounded-xl"
+                  maxLength={500}
+                />
               </div>
 
               <div className="flex gap-4">
