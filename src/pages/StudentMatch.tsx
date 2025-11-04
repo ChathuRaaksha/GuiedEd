@@ -26,6 +26,8 @@ const StudentMatch = () => {
   const [receivedInvites, setReceivedInvites] = useState<any[]>([]);
   const [sentInvites, setSentInvites] = useState<any[]>([]);
   const [meetingModal, setMeetingModal] = useState<{ open: boolean; studentId: string; mentorId: string } | null>(null);
+  const [mockSentInvites, setMockSentInvites] = useState<Set<string>>(new Set());
+  const [dismissedMocks, setDismissedMocks] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!user || !profile) {
@@ -175,6 +177,13 @@ const StudentMatch = () => {
   };
 
   const handleSendInvite = async (mentorId: string, score: number, reasons: string[]) => {
+    // Handle mock mentors
+    if (mentorId.startsWith('mock-')) {
+      setMockSentInvites(prev => new Set([...prev, mentorId]));
+      toast.success("Mock invite sent!");
+      return;
+    }
+
     if (!studentProfile) return;
 
     try {
@@ -201,6 +210,11 @@ const StudentMatch = () => {
         toast.error("Failed to send invite. Please try again.");
       }
     }
+  };
+
+  const handleDismissMock = (mentorId: string) => {
+    setDismissedMocks(prev => new Set([...prev, mentorId]));
+    toast.info("Mentor dismissed");
   };
 
   const handleAcceptInvite = async (inviteId: string, invite: any) => {
@@ -315,8 +329,13 @@ const StudentMatch = () => {
                   <p className="text-muted-foreground">Check back later for new mentors!</p>
                 </Card>
               ) : (
-                availableMatches.map((match) => {
-                  const alreadySent = sentInvites.some(inv => inv.mentor_id === match.mentor.id);
+                availableMatches
+                  .filter(match => !dismissedMocks.has(match.mentor.id))
+                  .map((match) => {
+                  const isMock = match.mentor.id.startsWith('mock-');
+                  const alreadySent = isMock 
+                    ? mockSentInvites.has(match.mentor.id)
+                    : sentInvites.some(inv => inv.mentor_id === match.mentor.id);
 
                   return (
                     <Card key={match.mentor.id} className="p-6 hover:shadow-lg transition-shadow">
@@ -373,10 +392,23 @@ const StudentMatch = () => {
 
                         <div className="md:w-40 flex flex-col gap-3">
                           {alreadySent ? (
-                            <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 font-semibold text-sm">
-                              <CheckCircle className="w-5 h-5" />
-                              <span>Invite Sent</span>
-                            </div>
+                            <>
+                              <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 font-semibold text-sm">
+                                <CheckCircle className="w-5 h-5" />
+                                <span>Invite Sent</span>
+                              </div>
+                              {isMock && (
+                                <Button
+                                  onClick={() => handleDismissMock(match.mentor.id)}
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full gap-2"
+                                >
+                                  <X className="w-4 h-4" />
+                                  Dismiss
+                                </Button>
+                              )}
+                            </>
                           ) : (
                             <Button
                               onClick={() => handleSendInvite(match.mentor.id, match.score, match.reasons)}
