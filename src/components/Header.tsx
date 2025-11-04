@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { LogOut, User, Users } from "lucide-react";
+import { LogOut, User, Users, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import logo from "@/assets/logo.png";
@@ -33,6 +33,14 @@ export const Header = () => {
                   Profile
                 </Button>
               </Link>
+              {profile.role === 'ADMIN' && (
+                <Link to="/admin">
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <Shield className="w-4 h-4" />
+                    Admin
+                  </Button>
+                </Link>
+              )}
               <Button variant="ghost" size="sm" onClick={signOut} className="gap-2">
                 <LogOut className="w-4 h-4" />
                 Sign Out

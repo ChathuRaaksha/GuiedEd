@@ -13,6 +13,7 @@ import MentorOnboarding from "./pages/MentorOnboarding";
 import FacilitatorOnboarding from "./pages/FacilitatorOnboarding";
 import Match from "./pages/Match";
 import Profile from "./pages/Profile";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -65,6 +66,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <Admin />
                 </ProtectedRoute>
               }
             />
