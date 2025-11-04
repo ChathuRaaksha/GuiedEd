@@ -9,7 +9,7 @@ export const EdAIBanner = () => {
       <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-0"></div>
       
       <div className="relative z-10 flex items-start gap-6">
-        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0 border border-primary/20">
+        <div className="w-16 h-16 rounded-2xl bg-background flex items-center justify-center flex-shrink-0 border border-primary/20">
           <img src={edIcon} alt="Ed AI" className="w-12 h-12" />
         </div>
 
