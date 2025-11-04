@@ -58,6 +58,11 @@ const Profile = () => {
       return;
     }
 
+    if (profile?.role === "ADMIN") {
+      navigate("/admin");
+      return;
+    }
+
     fetchProfile();
   }, [user, profile, navigate]);
 
