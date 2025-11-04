@@ -27,8 +27,8 @@ const Landing = () => {
             </span>
           </div>
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-            AI mentorship that guides students toward their{" "}
-            <span className="text-primary">dreams</span>
+            Connecting curiosity with{" "}
+            <span className="text-primary">experience</span>
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto">
             Students share interests. GuidEd connects them with mentors. Ed assists the journey and a facilitator supervises.
@@ -272,7 +272,7 @@ const Landing = () => {
             <div>
               <img src={logo} alt="GuidEd" className="h-8 mb-4" />
               <p className="text-sm text-muted-foreground">
-                AI mentorship that guides students toward their dreams.
+                Connecting curiosity with experience.
               </p>
             </div>
             <div>
