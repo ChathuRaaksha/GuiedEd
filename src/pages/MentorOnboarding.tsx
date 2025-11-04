@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { mentorOnboardingSchema } from "@/lib/validationSchemas";
 import logo from "@/assets/logo.png";
+import * as pdfjsLib from 'pdfjs-dist';
 
 const SKILL_OPTIONS = [
   "📰 News",
@@ -105,6 +106,9 @@ const SWEDISH_CITIES = [
   "Other",
 ];
 
+// Set up PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
 const MentorOnboarding = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
@@ -130,6 +134,50 @@ const MentorOnboarding = () => {
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [uploadingCv, setUploadingCv] = useState(false);
 
+  const extractTextFromPDF = async (file: File): Promise<string> => {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      let fullText = '';
+
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items
+          .map((item: any) => item.str)
+          .join(' ');
+        fullText += pageText + '\n';
+      }
+
+      return fullText;
+    } catch (error) {
+      console.error('Error extracting PDF text:', error);
+      throw new Error('Failed to extract text from PDF');
+    }
+  };
+
+  const analyzeCVWithBackend = async (cvText: string): Promise<any> => {
+    try {
+      const response = await fetch('http://localhost:5001/api/analyze-cv', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ cv_text: cvText }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze CV');
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error analyzing CV:', error);
+      throw error;
+    }
+  };
+
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -151,10 +199,13 @@ const MentorOnboarding = () => {
 
     try {
       let cvUrl = "";
+      let cvData = null;
       
       // Upload CV if provided
       if (cvFile) {
         setUploadingCv(true);
+        toast.info("Uploading and analyzing your CV...");
+        
         const fileExt = cvFile.name.split('.').pop();
         const fileName = `${user.id}/${Date.now()}.${fileExt}`;
         
@@ -169,6 +220,23 @@ const MentorOnboarding = () => {
           .getPublicUrl(fileName);
         
         cvUrl = publicUrl;
+
+        // Extract text and analyze CV for PDF files
+        if (fileExt?.toLowerCase() === 'pdf') {
+          try {
+            const cvText = await extractTextFromPDF(cvFile);
+            const analysisResult = await analyzeCVWithBackend(cvText);
+            cvData = {
+              interests: analysisResult.interests || [],
+              analyzed_at: new Date().toISOString(),
+            };
+            toast.success("CV analyzed successfully!");
+          } catch (error) {
+            console.error("CV analysis failed:", error);
+            toast.warning("CV uploaded but analysis failed. You can still continue.");
+          }
+        }
+        
         setUploadingCv(false);
       }
 
@@ -206,6 +274,7 @@ const MentorOnboarding = () => {
         max_students: validated.maxStudents,
         linkedin_url: validated.linkedinUrl || null,
         cv_url: cvUrl || null,
+        cv_data: cvData || null,
       };
 
       let error;
