@@ -1,46 +1,30 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Users, Sparkles, Heart, CheckCircle, LogOut, User } from "lucide-react";
+import { ArrowRight, Users, Sparkles, Heart, CheckCircle, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import logo from "@/assets/logo.png";
 import edIcon from "@/assets/ed-icon.png";
-
 const Landing = () => {
-  const { user, profile, signOut } = useAuth();
-
+  const {
+    user,
+    profile,
+    signOut
+  } = useAuth();
   return <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border sticky top-0 bg-background/95 backdrop-blur-sm z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <img src={logo} alt="GuidEd" className="h-10" />
           <nav className="hidden md:flex items-center gap-6">
-            {user && profile ? (
-              <>
-                <Link to="/profile">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    className="gap-2"
-                  >
-                    <User className="w-4 h-4" />
-                    Profile
-                  </Button>
-                </Link>
+            {user && profile ? <>
                 <span className="text-sm font-medium px-4 py-2 rounded-full bg-primary/10 text-primary">
                   {profile.role}
                 </span>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={signOut}
-                  className="gap-2"
-                >
+                <Button variant="ghost" size="sm" onClick={signOut} className="gap-2">
                   <LogOut className="w-4 h-4" />
                   Sign Out
                 </Button>
-              </>
-            ) : (
-              <>
+              </> : <>
                 <Link to="/auth/login">
                   <Button variant="ghost" size="sm">
                     Sign In
@@ -51,8 +35,7 @@ const Landing = () => {
                     Get Started
                   </Button>
                 </Link>
-              </>
-            )}
+              </>}
           </nav>
         </div>
       </header>
@@ -236,12 +219,7 @@ const Landing = () => {
                 Become a Mentor →
               </Link>
             </div>
-            <div>
-              <h4 className="font-bold mb-4">For Schools</h4>
-              <Link to="/onboarding/facilitator" className="block text-sm text-muted-foreground hover:text-primary mb-2 transition-colors">
-                Facilitator Access →
-              </Link>
-            </div>
+            
           </div>
           <div className="border-t border-border mt-8 pt-8 text-center">
             <p className="text-sm text-muted-foreground">© 2025 GuidEd. All rights reserved.</p>
