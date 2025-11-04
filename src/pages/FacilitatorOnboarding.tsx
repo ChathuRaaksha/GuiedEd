@@ -3,20 +3,43 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Shield } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Shield, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { facilitatorOnboardingSchema } from "@/lib/validationSchemas";
 import logo from "@/assets/logo.png";
 
+const SWEDISH_CITIES = [
+  "Stockholm",
+  "Gothenburg",
+  "Malmö",
+  "Uppsala",
+  "Västerås",
+  "Örebro",
+  "Linköping",
+  "Helsingborg",
+  "Jönköping",
+  "Norrköping",
+  "Lund",
+  "Umeå",
+  "Gävle",
+  "Other",
+];
+
 const FacilitatorOnboarding = () => {
+  const navigate = useNavigate();
+  const { user, profile } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
+    email: profile?.email || "",
     org: "",
     role: "",
     city: "",
-    maxMatches: "10",
+    postcode: "",
+    maxMatches: "50",
     notes: "",
   });
 
@@ -25,57 +48,92 @@ const FacilitatorOnboarding = () => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.name || !formData.email || !formData.org) {
-      toast.error("Please fill in all required fields");
+    if (!user) {
+      toast.error("You must be logged in to continue");
       return;
     }
 
     try {
+      const validated = facilitatorOnboardingSchema.parse({
+        ...formData,
+        maxMatches: parseInt(formData.maxMatches),
+        email: profile?.email || formData.email,
+      });
+
       const { error } = await supabase
         .from("facilitators")
         .insert({
-          name: formData.name,
-          email: formData.email,
-          org: formData.org,
-          role: formData.role || null,
-          city: formData.city || null,
-          max_matches: parseInt(formData.maxMatches),
-          notes: formData.notes || null,
+          user_id: user.id,
+          name: validated.name,
+          email: validated.email,
+          org: validated.org || null,
+          role: validated.role || null,
+          city: validated.city,
+          postcode: validated.postcode,
+          max_matches: validated.maxMatches,
+          notes: validated.notes || null,
         });
 
       if (error) throw error;
 
-      toast.success("Thank you! We'll contact you soon with access details.");
+      toast.success("Thank you! Your facilitator profile has been created. Welcome to the team!");
+      setTimeout(() => {
+        navigate("/");
+      }, 1500);
     } catch (error: any) {
       console.error("Error creating facilitator profile:", error);
-      toast.error(error.message || "Failed to create profile. Please try again.");
+      if (error.name === 'ZodError') {
+        toast.error(error.issues[0].message);
+      } else {
+        toast.error(error.message || "Failed to create profile. Please try again.");
+      }
     }
   };
 
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border py-4">
-        <div className="container mx-auto px-4 flex items-center justify-between">
+        <div className="container mx-auto px-4">
           <img src={logo} alt="GuidEd" className="h-8" />
-          <Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-            Back to home
-          </Link>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-12">
-            <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Shield className="w-8 h-8 text-accent" />
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-semibold mb-4">
+              <Shield className="w-5 h-5" />
+              Facilitator Registration
             </div>
-            <h1 className="text-4xl font-bold mb-3">Facilitator Access</h1>
-            <p className="text-lg text-muted-foreground">
-              Help supervise and ensure quality mentorship connections in your school or organization
+            <h1 className="text-4xl font-bold mb-4">Join as a Facilitator</h1>
+            <p className="text-xl text-muted-foreground">
+              Help coordinate and oversee meaningful mentorship connections
             </p>
           </div>
 
-          <div className="bg-card p-8 rounded-2xl border border-border space-y-6">
+          <div className="bg-card p-8 rounded-3xl border space-y-6">
+            <div className="bg-secondary/30 p-6 rounded-2xl">
+              <h3 className="font-semibold mb-3">Facilitator Responsibilities:</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2">
+                  <span className="text-primary mt-0.5">✓</span>
+                  <span>Review and approve mentor-student match proposals</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary mt-0.5">✓</span>
+                  <span>Schedule and coordinate initial meetings</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary mt-0.5">✓</span>
+                  <span>Monitor ongoing mentorship relationships</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary mt-0.5">✓</span>
+                  <span>Provide support and guidance when needed</span>
+                </li>
+              </ul>
+            </div>
+
             <div>
               <Label htmlFor="name">Full Name *</Label>
               <Input
@@ -83,91 +141,92 @@ const FacilitatorOnboarding = () => {
                 value={formData.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
                 placeholder="Your full name"
-                className="mt-1"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-                placeholder="your.email@school.edu"
-                className="mt-1"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="org">Organization *</Label>
-              <Input
-                id="org"
-                value={formData.org}
-                onChange={(e) => handleInputChange("org", e.target.value)}
-                placeholder="School or organization name"
-                className="mt-1"
+                className="mt-1 rounded-xl"
               />
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="org">Organization</Label>
+                <Input
+                  id="org"
+                  value={formData.org}
+                  onChange={(e) => handleInputChange("org", e.target.value)}
+                  placeholder="NGO, school, or municipality"
+                  className="mt-1 rounded-xl"
+                />
+              </div>
               <div>
                 <Label htmlFor="role">Your Role</Label>
                 <Input
                   id="role"
                   value={formData.role}
                   onChange={(e) => handleInputChange("role", e.target.value)}
-                  placeholder="e.g., Counselor, Coordinator"
-                  className="mt-1"
+                  placeholder="e.g., School Counselor, Coordinator"
+                  className="mt-1 rounded-xl"
+                />
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="postcode">Postcode *</Label>
+                <Input
+                  id="postcode"
+                  value={formData.postcode}
+                  onChange={(e) => handleInputChange("postcode", e.target.value)}
+                  placeholder="e.g., 123 45"
+                  className="mt-1 rounded-xl"
                 />
               </div>
               <div>
-                <Label htmlFor="city">City</Label>
-                <Input
-                  id="city"
-                  value={formData.city}
-                  onChange={(e) => handleInputChange("city", e.target.value)}
-                  placeholder="City"
-                  className="mt-1"
-                />
+                <Label htmlFor="city">City *</Label>
+                <Select value={formData.city} onValueChange={(value) => handleInputChange("city", value)}>
+                  <SelectTrigger className="mt-1 rounded-xl">
+                    <SelectValue placeholder="Select city" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SWEDISH_CITIES.map((city) => (
+                      <SelectItem key={city} value={city}>
+                        {city}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
             <div>
-              <Label htmlFor="maxMatches">Expected number of student matches</Label>
+              <Label htmlFor="maxMatches">Maximum Matches to Oversee *</Label>
               <Input
                 id="maxMatches"
                 type="number"
+                min="1"
+                max="500"
                 value={formData.maxMatches}
                 onChange={(e) => handleInputChange("maxMatches", e.target.value)}
-                placeholder="10"
-                className="mt-1"
+                className="mt-1 rounded-xl"
               />
+              <p className="text-sm text-muted-foreground mt-1">
+                How many mentor-student matches can you effectively oversee?
+              </p>
             </div>
 
             <div>
-              <Label htmlFor="notes">Additional notes (optional)</Label>
+              <Label htmlFor="notes">Additional Notes</Label>
               <Textarea
                 id="notes"
                 value={formData.notes}
                 onChange={(e) => handleInputChange("notes", e.target.value)}
-                placeholder="Tell us about your needs and how you plan to use GuidEd..."
-                className="mt-1 min-h-[100px]"
+                placeholder="Tell us about your experience, qualifications, or any other relevant information..."
+                className="mt-1 min-h-[120px] rounded-xl"
+                maxLength={500}
               />
             </div>
 
-            <div className="bg-secondary/30 p-4 rounded-xl">
-              <h3 className="font-medium mb-2">What facilitators do:</h3>
-              <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• Review and approve student and mentor matches</li>
-                <li>• Monitor mentorship progress</li>
-                <li>• Ensure quality and safety of connections</li>
-                <li>• Provide support when needed</li>
-              </ul>
-            </div>
-
-            <Button onClick={handleSubmit} className="btn-primary w-full">
-              Request Access
+            <Button onClick={handleSubmit} className="btn-primary w-full h-14 text-lg">
+              Request Facilitator Access
+              <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
           </div>
         </div>

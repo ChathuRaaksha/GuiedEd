@@ -3,10 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowRight, ArrowLeft, Heart } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowRight, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { mentorOnboardingSchema } from "@/lib/validationSchemas";
 import logo from "@/assets/logo.png";
 
 const SKILL_OPTIONS = [
@@ -20,6 +23,23 @@ const SKILL_OPTIONS = [
   "💼 Business",
   "🔬 Science",
   "🎬 Media",
+  "Mathematics",
+  "Engineering",
+  "Writing",
+  "Leadership",
+];
+
+const HOBBY_OPTIONS = [
+  "Reading",
+  "Gaming",
+  "Cooking",
+  "Travel",
+  "Photography",
+  "Fitness",
+  "Volunteering",
+  "Gardening",
+  "DIY Projects",
+  "Collecting",
 ];
 
 const LANGUAGE_OPTIONS = [
@@ -30,29 +50,74 @@ const LANGUAGE_OPTIONS = [
   "Mandarin",
   "Swedish",
   "Arabic",
+  "Portuguese",
+  "Italian",
+  "Russian",
+  "Japanese",
+  "Korean",
+  "Hindi",
+  "Dutch",
+  "Polish",
+  "Turkish",
+  "Norwegian",
+  "Danish",
+  "Finnish",
+  "Other",
+];
+
+const EDUCATION_LEVELS = [
+  { value: "middle_school", label: "Middle School" },
+  { value: "high_school", label: "High School" },
+  { value: "university", label: "University" },
+];
+
+const SWEDISH_CITIES = [
+  "Stockholm",
+  "Gothenburg",
+  "Malmö",
+  "Uppsala",
+  "Västerås",
+  "Örebro",
+  "Linköping",
+  "Helsingborg",
+  "Jönköping",
+  "Norrköping",
+  "Lund",
+  "Umeå",
+  "Gävle",
   "Other",
 ];
 
 const MentorOnboarding = () => {
+  const navigate = useNavigate();
+  const { user, profile } = useAuth();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    email: "",
+    email: profile?.email || "",
+    educationLevel: "",
+    city: "",
+    postcode: "",
     employer: "",
     role: "",
     bio: "",
+    talkAboutYourself: "",
     skills: [] as string[],
+    hobbies: [] as string[],
     languages: [] as string[],
     agePref: "any",
-    meetingPref: "both",
-    maxStudents: "1",
+    meetingPref: "either",
+    maxStudents: "3",
+    linkedinUrl: "",
   });
+  const [cvFile, setCvFile] = useState<File | null>(null);
+  const [uploadingCv, setUploadingCv] = useState(false);
 
   const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const toggleArrayItem = (field: "skills" | "languages", value: string) => {
+  const toggleArrayItem = (field: "skills" | "hobbies" | "languages", value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: prev[field].includes(value)
@@ -62,69 +127,103 @@ const MentorOnboarding = () => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.firstName || !formData.lastName || !formData.email) {
-      toast.error("Please fill in all required fields");
-      return;
-    }
-
-    if (formData.skills.length === 0 || formData.languages.length === 0) {
-      toast.error("Please select at least one skill and language");
+    if (!user) {
+      toast.error("You must be logged in to continue");
       return;
     }
 
     try {
+      let cvUrl = "";
+      
+      // Upload CV if provided
+      if (cvFile) {
+        setUploadingCv(true);
+        const fileExt = cvFile.name.split('.').pop();
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('cvs')
+          .upload(fileName, cvFile);
+        
+        if (uploadError) throw uploadError;
+        
+        const { data: { publicUrl } } = supabase.storage
+          .from('cvs')
+          .getPublicUrl(fileName);
+        
+        cvUrl = publicUrl;
+        setUploadingCv(false);
+      }
+
+      const validated = mentorOnboardingSchema.parse({
+        ...formData,
+        maxStudents: parseInt(formData.maxStudents),
+        email: profile?.email || formData.email,
+        cvUrl: cvUrl || undefined,
+      });
+
       const { error } = await supabase
         .from("mentors")
         .insert({
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          email: formData.email,
-          employer: formData.employer || null,
-          role: formData.role || null,
-          bio: formData.bio || null,
-          skills: formData.skills,
-          languages: formData.languages,
-          age_pref: formData.agePref,
-          meeting_pref: formData.meetingPref,
-          max_students: parseInt(formData.maxStudents),
+          user_id: user.id,
+          first_name: validated.firstName,
+          last_name: validated.lastName,
+          email: validated.email,
+          education_level: validated.educationLevel || null,
+          city: validated.city,
+          postcode: validated.postcode,
+          employer: validated.employer || null,
+          role: validated.role || null,
+          bio: validated.bio || null,
+          talk_about_yourself: validated.talkAboutYourself || null,
+          skills: validated.skills,
+          hobbies: validated.hobbies || [],
+          languages: validated.languages,
+          age_pref: validated.agePref,
+          meeting_pref: validated.meetingPref,
+          max_students: validated.maxStudents,
+          linkedin_url: validated.linkedinUrl || null,
+          cv_url: cvUrl || null,
         });
 
       if (error) throw error;
 
-      toast.success("Thank you! Your mentor profile has been created. We'll be in touch soon!");
+      toast.success("Thank you! Your mentor profile has been created successfully!");
+      setTimeout(() => {
+        navigate("/");
+      }, 1500);
     } catch (error: any) {
       console.error("Error creating mentor profile:", error);
-      toast.error(error.message || "Failed to create profile. Please try again.");
+      setUploadingCv(false);
+      if (error.name === 'ZodError') {
+        toast.error(error.issues[0].message);
+      } else {
+        toast.error(error.message || "Failed to create profile. Please try again.");
+      }
     }
   };
 
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border py-4">
-        <div className="container mx-auto px-4 flex items-center justify-between">
+        <div className="container mx-auto px-4">
           <img src={logo} alt="GuidEd" className="h-8" />
-          <Link to="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-            Back to home
-          </Link>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-12">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Heart className="w-8 h-8 text-primary" />
-            </div>
-            <h1 className="text-4xl font-bold mb-3">Become a Mentor</h1>
-            <p className="text-lg text-muted-foreground">
-              Make a difference in a student's life by sharing your experience and guidance
+            <h1 className="text-4xl font-bold mb-4">Become a Mentor 🌟</h1>
+            <p className="text-xl text-muted-foreground">
+              Share your experience and help guide the next generation
             </p>
           </div>
 
-          <div className="space-y-6">
-            {/* Basic Info */}
-            <div className="bg-card p-6 rounded-2xl border border-border">
-              <h2 className="text-xl font-bold mb-4">About You</h2>
+          <div className="space-y-8">
+            {/* Basic Information */}
+            <div className="bg-card p-8 rounded-3xl border">
+              <h2 className="text-2xl font-bold mb-6">Basic Information</h2>
               <div className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
@@ -133,8 +232,8 @@ const MentorOnboarding = () => {
                       id="firstName"
                       value={formData.firstName}
                       onChange={(e) => handleInputChange("firstName", e.target.value)}
-                      placeholder="First name"
-                      className="mt-1"
+                      placeholder="Your first name"
+                      className="mt-1 rounded-xl"
                     />
                   </div>
                   <div>
@@ -143,22 +242,67 @@ const MentorOnboarding = () => {
                       id="lastName"
                       value={formData.lastName}
                       onChange={(e) => handleInputChange("lastName", e.target.value)}
-                      placeholder="Last name"
-                      className="mt-1"
+                      placeholder="Your last name"
+                      className="mt-1 rounded-xl"
                     />
                   </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="email">Email *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    placeholder="your.email@example.com"
-                    className="mt-1"
-                  />
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="educationLevel">Education Level</Label>
+                    <Select value={formData.educationLevel} onValueChange={(value) => handleInputChange("educationLevel", value)}>
+                      <SelectTrigger className="mt-1 rounded-xl">
+                        <SelectValue placeholder="Select level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {EDUCATION_LEVELS.map((level) => (
+                          <SelectItem key={level.value} value={level.value}>
+                            {level.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="linkedinUrl">LinkedIn URL</Label>
+                    <Input
+                      id="linkedinUrl"
+                      type="url"
+                      value={formData.linkedinUrl}
+                      onChange={(e) => handleInputChange("linkedinUrl", e.target.value)}
+                      placeholder="https://linkedin.com/in/yourprofile"
+                      className="mt-1 rounded-xl"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="postcode">Postcode *</Label>
+                    <Input
+                      id="postcode"
+                      value={formData.postcode}
+                      onChange={(e) => handleInputChange("postcode", e.target.value)}
+                      placeholder="e.g., 123 45"
+                      className="mt-1 rounded-xl"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="city">City *</Label>
+                    <Select value={formData.city} onValueChange={(value) => handleInputChange("city", value)}>
+                      <SelectTrigger className="mt-1 rounded-xl">
+                        <SelectValue placeholder="Select city" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SWEDISH_CITIES.map((city) => (
+                          <SelectItem key={city} value={city}>
+                            {city}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4">
@@ -168,53 +312,117 @@ const MentorOnboarding = () => {
                       id="employer"
                       value={formData.employer}
                       onChange={(e) => handleInputChange("employer", e.target.value)}
-                      placeholder="Company name"
-                      className="mt-1"
+                      placeholder="Where do you work?"
+                      className="mt-1 rounded-xl"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="role">Role</Label>
+                    <Label htmlFor="role">Your Role</Label>
                     <Input
                       id="role"
                       value={formData.role}
                       onChange={(e) => handleInputChange("role", e.target.value)}
-                      placeholder="Your job title"
-                      className="mt-1"
+                      placeholder="e.g., Software Engineer"
+                      className="mt-1 rounded-xl"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="bio">Tell students about yourself</Label>
+                  <Label htmlFor="bio">Short Bio</Label>
                   <Textarea
                     id="bio"
                     value={formData.bio}
                     onChange={(e) => handleInputChange("bio", e.target.value)}
-                    placeholder="Share your background, passions, and why you want to mentor..."
-                    className="mt-1 min-h-[100px]"
+                    placeholder="Tell us about yourself and why you want to be a mentor..."
+                    className="mt-1 min-h-[100px] rounded-xl"
+                    maxLength={500}
                   />
+                </div>
+
+                <div>
+                  <Label htmlFor="talkAboutYourself">Talk about yourself</Label>
+                  <Textarea
+                    id="talkAboutYourself"
+                    value={formData.talkAboutYourself}
+                    onChange={(e) => handleInputChange("talkAboutYourself", e.target.value)}
+                    placeholder="Share more about your interests, hobbies, and personality..."
+                    className="mt-1 min-h-[100px] rounded-xl"
+                    maxLength={500}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="cv">Upload CV (Optional)</Label>
+                  <div className="mt-1">
+                    <Input
+                      id="cv"
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          if (file.size > 5 * 1024 * 1024) {
+                            toast.error("File size must be less than 5MB");
+                            e.target.value = "";
+                            return;
+                          }
+                          setCvFile(file);
+                          toast.success("CV selected successfully");
+                        }
+                      }}
+                      className="rounded-xl cursor-pointer"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      PDF, DOC, or DOCX format. Max 5MB
+                    </p>
+                    {cvFile && (
+                      <p className="text-sm text-primary mt-2">✓ {cvFile.name}</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Skills & Languages */}
-            <div className="bg-card p-6 rounded-2xl border border-border">
-              <h2 className="text-xl font-bold mb-4">Your Expertise</h2>
-              <div className="space-y-4">
+            {/* Expertise */}
+            <div className="bg-card p-8 rounded-3xl border">
+              <h2 className="text-2xl font-bold mb-6">Your Expertise</h2>
+              <div className="space-y-6">
                 <div>
-                  <Label className="mb-3 block">Areas you can help with *</Label>
+                  <Label className="mb-3 block">Skills & Professional Interests *</Label>
                   <div className="flex flex-wrap gap-2">
                     {SKILL_OPTIONS.map((skill) => (
                       <button
                         key={skill}
+                        type="button"
                         onClick={() => toggleArrayItem("skills", skill)}
-                        className={`tag-chip ${
+                        className={`tag-chip transition-all ${
                           formData.skills.includes(skill)
-                            ? "bg-primary text-primary-foreground"
-                            : ""
+                            ? "bg-accent text-accent-foreground border-2 border-accent font-semibold scale-105"
+                            : "border border-border hover:border-accent"
                         }`}
                       >
                         {skill}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="mb-3 block">Hobbies & Personal Interests</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {HOBBY_OPTIONS.map((hobby) => (
+                      <button
+                        key={hobby}
+                        type="button"
+                        onClick={() => toggleArrayItem("hobbies", hobby)}
+                        className={`tag-chip transition-all ${
+                          formData.hobbies.includes(hobby)
+                            ? "bg-accent text-accent-foreground border-2 border-accent font-semibold scale-105"
+                            : "border border-border hover:border-accent"
+                        }`}
+                      >
+                        {hobby}
                       </button>
                     ))}
                   </div>
@@ -226,11 +434,12 @@ const MentorOnboarding = () => {
                     {LANGUAGE_OPTIONS.map((lang) => (
                       <button
                         key={lang}
+                        type="button"
                         onClick={() => toggleArrayItem("languages", lang)}
-                        className={`tag-chip ${
+                        className={`tag-chip transition-all ${
                           formData.languages.includes(lang)
-                            ? "bg-accent text-accent-foreground"
-                            : ""
+                            ? "bg-accent text-accent-foreground border-2 border-accent font-semibold scale-105"
+                            : "border border-border hover:border-accent"
                         }`}
                       >
                         {lang}
@@ -241,55 +450,104 @@ const MentorOnboarding = () => {
               </div>
             </div>
 
-            {/* Preferences */}
-            <div className="bg-card p-6 rounded-2xl border border-border">
-              <h2 className="text-xl font-bold mb-4">Mentoring Preferences</h2>
-              <div className="space-y-4">
+            {/* Mentoring Preferences */}
+            <div className="bg-card p-8 rounded-3xl border">
+              <h2 className="text-2xl font-bold mb-6">Mentoring Preferences</h2>
+              <div className="space-y-6">
                 <div>
-                  <Label className="mb-3 block">Student age preference</Label>
-                  <div className="flex gap-3">
-                    {["High School", "College", "Any"].map((pref) => (
-                      <button
-                        key={pref}
-                        onClick={() => handleInputChange("agePref", pref.toLowerCase())}
-                        className={`flex-1 p-3 rounded-xl border-2 transition-all ${
-                          formData.agePref === pref.toLowerCase()
-                            ? "border-primary bg-primary/5"
-                            : "border-border"
-                        }`}
-                      >
-                        {pref}
-                      </button>
-                    ))}
+                  <Label className="mb-3 block">Student Education Level Preference</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleInputChange("agePref", "middle_school")}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        formData.agePref === "middle_school"
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <div className="font-medium">Middle School</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleInputChange("agePref", "high_school")}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        formData.agePref === "high_school"
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <div className="font-medium">High School</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleInputChange("agePref", "university")}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        formData.agePref === "university"
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <div className="font-medium">University</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleInputChange("agePref", "any")}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        formData.agePref === "any"
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <div className="font-medium">Any</div>
+                    </button>
                   </div>
                 </div>
 
                 <div>
-                  <Label className="mb-3 block">Meeting format</Label>
-                  <div className="flex gap-3">
-                    {[
-                      { value: "online", label: "Online", emoji: "💻" },
-                      { value: "in-person", label: "In Person", emoji: "🤝" },
-                      { value: "both", label: "Both", emoji: "✨" },
-                    ].map(({ value, label, emoji }) => (
-                      <button
-                        key={value}
-                        onClick={() => handleInputChange("meetingPref", value)}
-                        className={`flex-1 p-3 rounded-xl border-2 transition-all ${
-                          formData.meetingPref === value
-                            ? "border-primary bg-primary/5"
-                            : "border-border"
-                        }`}
-                      >
-                        <div className="text-2xl mb-1">{emoji}</div>
-                        <div className="text-sm font-medium">{label}</div>
-                      </button>
-                    ))}
+                  <Label className="mb-3 block">Meeting Preference</Label>
+                  <div className="grid grid-cols-3 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleInputChange("meetingPref", "online")}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        formData.meetingPref === "online"
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <div className="text-2xl mb-2">💻</div>
+                      <div className="font-medium">Online</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleInputChange("meetingPref", "in_person")}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        formData.meetingPref === "in_person"
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <div className="text-2xl mb-2">🤝</div>
+                      <div className="font-medium">In Person</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleInputChange("meetingPref", "either")}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        formData.meetingPref === "either"
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <div className="text-2xl mb-2">✨</div>
+                      <div className="font-medium">Either</div>
+                    </button>
                   </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="maxStudents">Maximum students you can mentor</Label>
+                  <Label htmlFor="maxStudents">Maximum Number of Students *</Label>
                   <Input
                     id="maxStudents"
                     type="number"
@@ -297,14 +555,22 @@ const MentorOnboarding = () => {
                     max="10"
                     value={formData.maxStudents}
                     onChange={(e) => handleInputChange("maxStudents", e.target.value)}
-                    className="mt-1"
+                    className="mt-1 rounded-xl"
                   />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    How many students can you mentor at once? (1-10)
+                  </p>
                 </div>
               </div>
             </div>
 
-            <Button onClick={handleSubmit} className="btn-primary w-full">
-              Submit Application
+            <Button 
+              onClick={handleSubmit} 
+              className="btn-primary w-full h-14 text-lg"
+              disabled={uploadingCv}
+            >
+              {uploadingCv ? "Uploading CV..." : "Complete Mentor Profile"}
+              <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
           </div>
         </div>
