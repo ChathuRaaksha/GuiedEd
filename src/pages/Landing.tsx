@@ -169,7 +169,7 @@ const Landing = () => {
             <p className="text-center text-muted-foreground mb-12 max-w-3xl mx-auto text-lg">
               We are SU Heroes, a multidisciplinary team from Stockholm University who joined forces during the CHAS Academy AI-Assisted Workflow Coding Hackathon. Our shared mission is to make mentorship more accessible, inclusive, and fun through technology and human connection.
             </p>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center max-w-5xl mx-auto">
               {[
                 { name: "Jady Pamella", role: "AI, Cybersecurity & IT Consultant", linkedin: "https://linkedin.com/in/jadypamella", photo: jadyPhoto },
                 { name: "Phuwit Vititayanon", role: "Data Scientist & AI Maker", linkedin: "https://linkedin.com/in/phuwit-vititayanon-4b6503157", photo: phuwitPhoto },
@@ -181,7 +181,7 @@ const Landing = () => {
               ].map((member, index) => (
                 <div
                   key={index}
-                  className="bg-card p-6 rounded-3xl text-center card-hover group"
+                  className="bg-card p-6 rounded-3xl text-center card-hover group w-full max-w-xs"
                 >
                   <div className="relative w-32 h-32 mx-auto mb-4">
                     <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-xl" />
