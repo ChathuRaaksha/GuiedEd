@@ -1,8 +1,11 @@
 import csv
 import json
+from typing import Dict, List, Tuple, Any
 from temporalio import activity
 from openai import OpenAI
 from config import Config
+from geocoding import GeocodingService, get_fallback_coordinates
+from matching import MatchingScorer, validate_matching_input
 
 def load_interests():
     """Load interests from CSV file"""
@@ -110,4 +113,99 @@ Do not include any explanation, just the JSON array."""
                 
     except Exception as e:
         activity.logger.error(f"Error in analyze_cv_with_llm: {str(e)}")
+        raise
+
+
+@activity.defn
+async def geocode_postcodes(postcodes: Dict[str, str]) -> Dict[str, Tuple[float, float]]:
+    """
+    Geocode multiple postcodes to lat/lng coordinates.
+    
+    Args:
+        postcodes: Dict mapping person_id -> postcode
+        
+    Returns:
+        Dict mapping person_id -> (lat, lng) for successfully geocoded postcodes
+    """
+    activity.logger.info(f"Starting geocoding for {len(postcodes)} postcodes")
+    
+    try:
+        geocoding_service = GeocodingService()
+        results = geocoding_service.geocode_postcodes(postcodes)
+        
+        # Apply fallbacks for failed lookups
+        for person_id, postcode in postcodes.items():
+            if person_id not in results:
+                fallback_coords = get_fallback_coordinates(postcode)
+                if fallback_coords:
+                    results[person_id] = fallback_coords
+                    activity.logger.info(f"Applied fallback coordinates for {person_id} ({postcode}): {fallback_coords}")
+        
+        activity.logger.info(f"Geocoding completed: {len(results)} out of {len(postcodes)} postcodes resolved")
+        return results
+        
+    except Exception as e:
+        activity.logger.error(f"Error in geocode_postcodes: {str(e)}")
+        raise
+
+
+@activity.defn
+async def calculate_mentor_matches(
+    student: Dict[str, Any], 
+    mentors: List[Dict[str, Any]], 
+    coordinates: Dict[str, Tuple[float, float]]
+) -> List[Dict[str, Any]]:
+    """
+    Calculate matching scores between a student and mentors.
+    
+    Args:
+        student: Student profile dictionary
+        mentors: List of mentor profile dictionaries  
+        coordinates: Dict mapping person_id -> (lat, lng)
+        
+    Returns:
+        List of matches with mentor_id and score, sorted by score descending
+    """
+    activity.logger.info(f"Calculating matches for student against {len(mentors)} mentors")
+    
+    try:
+        scorer = MatchingScorer()
+        matches = scorer.calculate_matches(student, mentors, coordinates)
+        
+        activity.logger.info(f"Generated {len(matches)} matches with scores > 0")
+        return matches
+        
+    except Exception as e:
+        activity.logger.error(f"Error in calculate_mentor_matches: {str(e)}")
+        raise
+
+
+@activity.defn
+async def validate_matching_data(data: Dict[str, Any]) -> bool:
+    """
+    Validate the matching request data.
+    
+    Args:
+        data: The matching request data
+        
+    Returns:
+        True if valid
+        
+    Raises:
+        ValueError: If validation fails
+    """
+    activity.logger.info("Validating matching request data")
+    
+    try:
+        is_valid, error_message = validate_matching_input(data)
+        
+        if not is_valid:
+            activity.logger.error(f"Validation failed: {error_message}")
+            raise ValueError(error_message)
+        
+        activity.logger.info("Matching data validation successful")
+        return True
+        
+    except Exception as e:
+        activity.logger.error(f"Error in validate_matching_data: {str(e)}")
         raise

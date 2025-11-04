@@ -3,8 +3,13 @@ import logging
 from temporalio.client import Client
 from temporalio.worker import Worker
 from config import Config
-from workflows import CVAnalysisWorkflow
-from activities import analyze_cv_with_llm
+from workflows import CVAnalysisWorkflow, MatchingWorkflow
+from activities import (
+    analyze_cv_with_llm,
+    geocode_postcodes,
+    calculate_mentor_matches,
+    validate_matching_data
+)
 
 # Configure logging
 logging.basicConfig(
@@ -35,8 +40,13 @@ async def main():
         worker = Worker(
             client,
             task_queue=Config.TEMPORAL_TASK_QUEUE,
-            workflows=[CVAnalysisWorkflow],
-            activities=[analyze_cv_with_llm],
+            workflows=[CVAnalysisWorkflow, MatchingWorkflow],
+            activities=[
+                analyze_cv_with_llm,
+                geocode_postcodes,
+                calculate_mentor_matches,
+                validate_matching_data
+            ],
         )
         
         logger.info("Worker started successfully. Press Ctrl+C to stop.")

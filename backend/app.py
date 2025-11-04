@@ -4,7 +4,7 @@ import asyncio
 import logging
 from temporalio.client import Client
 from config import Config
-from workflows import CVAnalysisWorkflow
+from workflows import CVAnalysisWorkflow, MatchingWorkflow
 
 # Configure logging
 logging.basicConfig(
@@ -149,6 +149,142 @@ async def execute_workflow(cv_text: str) -> dict:
             "error": str(e),
             "interests": []
         }
+
+@app.route('/api/matching', methods=['POST'])
+def match_mentors():
+    """
+    Match a student with mentors based on various criteria.
+    
+    Request body:
+    {
+        "student": {
+            "education_level": "University",
+            "postcode": "11122",
+            "city": "Stockholm", 
+            "interests": ["Technology", "Gaming"],
+            "languages": ["Swedish", "English"],
+            "meeting_preference": "Both"
+        },
+        "mentors": [
+            {
+                "id": "mentor-123",
+                "education_level": "University",
+                "postcode": "11123", 
+                "city": "Stockholm",
+                "interests": ["Technology", "Business & Finance"],
+                "languages": ["Swedish", "English"],
+                "meeting_preference": "In person"
+            }
+        ]
+    }
+    
+    Response:
+    {
+        "suggest": [
+            {"mentor_id": "mentor-123", "score": 85},
+            {"mentor_id": "mentor-456", "score": 72}
+        ]
+    }
+    """
+    try:
+        # Validate request
+        if not request.is_json:
+            return jsonify({
+                "success": False,
+                "error": "Content-Type must be application/json"
+            }), 400
+        
+        data = request.get_json()
+        
+        # Basic structure validation
+        if 'student' not in data:
+            return jsonify({
+                "success": False,
+                "error": "Missing required field: student"
+            }), 400
+        
+        if 'mentors' not in data:
+            return jsonify({
+                "success": False,
+                "error": "Missing required field: mentors"
+            }), 400
+        
+        if not isinstance(data['mentors'], list) or len(data['mentors']) == 0:
+            return jsonify({
+                "success": False,
+                "error": "mentors must be a non-empty list"
+            }), 400
+        
+        logger.info(f"Received matching request for student against {len(data['mentors'])} mentors")
+        
+        # Execute Temporal workflow synchronously
+        result = asyncio.run(execute_matching_workflow(data))
+        
+        if result['success']:
+            logger.info(f"Successfully matched student, found {len(result['suggest'])} matches")
+            return jsonify({
+                "suggest": result['suggest']
+            }), 200
+        else:
+            logger.error(f"Matching workflow execution failed: {result.get('error')}")
+            return jsonify({
+                "success": False,
+                "error": result.get('error', 'Unknown error occurred'),
+                "suggest": []
+            }), 500
+            
+    except Exception as e:
+        logger.error(f"Error in match_mentors endpoint: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "suggest": []
+        }), 500
+
+
+async def execute_matching_workflow(matching_data: dict) -> dict:
+    """
+    Execute the Temporal matching workflow and wait for result.
+    
+    Args:
+        matching_data: The matching request data
+        
+    Returns:
+        Dictionary with workflow execution result
+    """
+    try:
+        # Get Temporal client
+        client = await get_temporal_client()
+        
+        # Generate unique workflow ID
+        import uuid
+        workflow_id = f"matching-{uuid.uuid4()}"
+        
+        logger.info(f"Starting matching workflow {workflow_id}")
+        
+        # Execute workflow and wait for result
+        result = await client.execute_workflow(
+            MatchingWorkflow.run,
+            matching_data,
+            id=workflow_id,
+            task_queue=Config.TEMPORAL_TASK_QUEUE,
+        )
+        
+        logger.info(f"Matching workflow {workflow_id} completed")
+        
+        return {
+            **result,
+            "workflow_id": workflow_id
+        }
+        
+    except Exception as e:
+        logger.error(f"Error executing matching workflow: {str(e)}")
+        return {
+            "success": False,
+            "error": str(e),
+            "suggest": []
+        }
+
 
 @app.route('/api/interests', methods=['GET'])
 def get_interests():
