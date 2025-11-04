@@ -170,13 +170,13 @@ const Landing = () => {
               We are SU Heroes, a multidisciplinary team from Stockholm University who joined forces during the CHAS Academy AI-Assisted Workflow Coding Hackathon. Our shared mission is to make mentorship more accessible, inclusive, and fun through technology and human connection.
             </p>
             <div className="flex flex-col items-center gap-8">
-              {/* First row - 4 people */}
+              {/* First row - 4 people in alphabetical order */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl">
                 {[
                   { name: "Jady Pamella", role: "AI, Cybersecurity & IT Consultant", linkedin: "https://linkedin.com/in/jadypamella", photo: jadyPhoto },
-                  { name: "Phuwit Vititayanon", role: "Data Scientist & AI Maker", linkedin: "https://linkedin.com/in/phuwit-vititayanon-4b6503157", photo: phuwitPhoto },
                   { name: "Maria Hellsen", role: "AI Business Consultant & Frontend Development Student", linkedin: "https://linkedin.com/in/maria-hellsen-9805723", photo: mariaPhoto },
-                  { name: "Reza Rezvani", role: "Partnership Manager at My Dream Now", linkedin: "https://linkedin.com/in/reza-rezvani-bb699011b", photo: rezaPhoto },
+                  { name: "Phuwit Vititayanon", role: "Data Scientist & AI Maker", linkedin: "https://linkedin.com/in/phuwit-vititayanon-4b6503157", photo: phuwitPhoto },
+                  { name: "Praneet Kala", role: "Digitalisation, Workflow Automation & Storytelling", linkedin: "https://linkedin.com/in/praneet-kala-0b165678", photo: praneetPhoto },
                 ].map((member, index) => (
                   <div
                     key={index}
@@ -207,12 +207,12 @@ const Landing = () => {
                 ))}
               </div>
               
-              {/* Second row - 3 people centered */}
+              {/* Second row - 3 people in alphabetical order */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-4xl">
                 {[
-                  { name: "Tobias Nilsson", role: "Independent Consultant in Business & Requirements Analysis", linkedin: "https://linkedin.com/in/tobiasnilsson75", photo: tobiasPhoto },
-                  { name: "Praneet Kala", role: "Digitalisation, Workflow Automation & Storytelling", linkedin: "https://linkedin.com/in/praneet-kala-0b165678", photo: praneetPhoto },
+                  { name: "Reza Rezvani", role: "Partnership Manager at My Dream Now", linkedin: "https://linkedin.com/in/reza-rezvani-bb699011b", photo: rezaPhoto },
                   { name: "Supun Chathuranga", role: "AI & Fullstack Engineer", linkedin: "https://linkedin.com/in/supun-chathuranga-190372148", photo: supunPhoto },
+                  { name: "Tobias Nilsson", role: "Independent Consultant in Business & Requirements Analysis", linkedin: "https://linkedin.com/in/tobiasnilsson75", photo: tobiasPhoto },
                 ].map((member, index) => (
                   <div
                     key={index}

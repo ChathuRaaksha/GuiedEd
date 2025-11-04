@@ -36,8 +36,24 @@ export const Header = () => {
               <span className="text-sm font-medium px-4 py-2 rounded-full bg-primary/10 text-primary uppercase">
                 {profile.role}
               </span>
-              {(profile.role === "STUDENT" || profile.role === "MENTOR" || profile.role === "FACILITATOR") && (
+              {profile.role === "STUDENT" && (
                 <Link to="/match">
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <Users className="w-4 h-4" />
+                    Matches
+                  </Button>
+                </Link>
+              )}
+              {profile.role === "MENTOR" && (
+                <Link to="/mentor/matches">
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <Users className="w-4 h-4" />
+                    Matches
+                  </Button>
+                </Link>
+              )}
+              {profile.role === "FACILITATOR" && (
+                <Link to="/facilitator/matches">
                   <Button variant="ghost" size="sm" className="gap-2">
                     <Users className="w-4 h-4" />
                     Matches
