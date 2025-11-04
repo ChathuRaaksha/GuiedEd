@@ -33,7 +33,8 @@ const FacilitatorOnboarding = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: profile?.email || "",
     org: "",
     role: "",
@@ -64,10 +65,11 @@ const FacilitatorOnboarding = () => {
         .from("facilitators")
         .insert({
           user_id: user.id,
-          name: validated.name,
+          first_name: validated.firstName,
+          last_name: validated.lastName,
           email: validated.email,
-          org: validated.org || null,
-          role: validated.role || null,
+          org: validated.org,
+          role: validated.role,
           city: validated.city,
           postcode: validated.postcode,
           max_matches: validated.maxMatches,
@@ -134,20 +136,32 @@ const FacilitatorOnboarding = () => {
               </ul>
             </div>
 
-            <div>
-              <Label htmlFor="name">Full Name *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleInputChange("name", e.target.value)}
-                placeholder="Your full name"
-                className="mt-1 rounded-xl"
-              />
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="firstName">First Name *</Label>
+                <Input
+                  id="firstName"
+                  value={formData.firstName}
+                  onChange={(e) => handleInputChange("firstName", e.target.value)}
+                  placeholder="Your first name"
+                  className="mt-1 rounded-xl"
+                />
+              </div>
+              <div>
+                <Label htmlFor="lastName">Last Name *</Label>
+                <Input
+                  id="lastName"
+                  value={formData.lastName}
+                  onChange={(e) => handleInputChange("lastName", e.target.value)}
+                  placeholder="Your last name"
+                  className="mt-1 rounded-xl"
+                />
+              </div>
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="org">Organization</Label>
+                <Label htmlFor="org">Organization *</Label>
                 <Input
                   id="org"
                   value={formData.org}
@@ -157,7 +171,7 @@ const FacilitatorOnboarding = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="role">Your Role</Label>
+                <Label htmlFor="role">Your Role *</Label>
                 <Input
                   id="role"
                   value={formData.role}

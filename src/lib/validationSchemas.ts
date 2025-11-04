@@ -48,10 +48,11 @@ export const mentorOnboardingSchema = z.object({
 });
 
 export const facilitatorOnboardingSchema = z.object({
-  name: z.string().min(1, 'Name is required').max(100),
+  firstName: z.string().min(1, 'First name is required').max(50),
+  lastName: z.string().min(1, 'Last name is required').max(50),
   email: z.string().email('Invalid email address').max(255),
-  org: z.string().max(100).optional(),
-  role: z.string().max(100).optional(),
+  org: z.string().min(1, 'Organization is required').max(100),
+  role: z.string().min(1, 'Role is required').max(100),
   city: z.string().min(1, 'City is required').max(100),
   postcode: z.string().min(1, 'Postcode is required').max(20),
   maxMatches: z.number().min(1).max(500).default(50),

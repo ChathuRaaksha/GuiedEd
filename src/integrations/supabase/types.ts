@@ -19,13 +19,14 @@ export type Database = {
           city: string | null
           created_at: string
           email: string
+          first_name: string
           id: string
+          last_name: string
           max_matches: number
-          name: string
           notes: string | null
-          org: string | null
+          org: string
           postcode: string | null
-          role: string | null
+          role: string
           updated_at: string
           user_id: string | null
         }
@@ -33,13 +34,14 @@ export type Database = {
           city?: string | null
           created_at?: string
           email: string
+          first_name: string
           id?: string
+          last_name: string
           max_matches?: number
-          name: string
           notes?: string | null
-          org?: string | null
+          org: string
           postcode?: string | null
-          role?: string | null
+          role: string
           updated_at?: string
           user_id?: string | null
         }
@@ -47,13 +49,14 @@ export type Database = {
           city?: string | null
           created_at?: string
           email?: string
+          first_name?: string
           id?: string
+          last_name?: string
           max_matches?: number
-          name?: string
           notes?: string | null
-          org?: string | null
+          org?: string
           postcode?: string | null
-          role?: string | null
+          role?: string
           updated_at?: string
           user_id?: string | null
         }
