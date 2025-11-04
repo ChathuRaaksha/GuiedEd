@@ -81,7 +81,66 @@ const StudentMatch = () => {
 
       const availableMentors = mentors?.filter(m => !rejectedMentorIds.has(m.id)) || [];
       const scoredMatches = calculateMatch(studentData, availableMentors);
-      setAvailableMatches(scoredMatches); // Show ALL matches
+      
+      // Add mock mentors if no real matches (for testing UI)
+      const mockMentors: ScoredMatch[] = scoredMatches.length === 0 ? [
+        {
+          mentor: {
+            id: 'mock-1',
+            first_name: 'Sofia',
+            last_name: 'Andersson',
+            role: 'Software Engineer',
+            employer: 'Spotify',
+            bio: 'Passionate about helping students discover their potential in tech. 10+ years of experience in software development.',
+            skills: ['Python', 'JavaScript', 'React', 'Machine Learning', 'Data Science'],
+            hobbies: ['Hiking', 'Photography', 'Gaming'],
+            languages: ['English', 'Swedish'],
+            age_pref: 'any',
+            meeting_pref: 'online',
+            max_students: 3,
+          },
+          score: 85,
+          reasons: ['3 shared interests', '2 common languages', 'Education level compatible', 'Meeting preference match'],
+        },
+        {
+          mentor: {
+            id: 'mock-2',
+            first_name: 'Lars',
+            last_name: 'Bergström',
+            role: 'Product Designer',
+            employer: 'Klarna',
+            bio: 'Helping young creatives find their voice in design. Love teaching UX/UI principles.',
+            skills: ['UI Design', 'Figma', 'User Research', 'Prototyping', 'Art'],
+            hobbies: ['Art', 'Music', 'Travel'],
+            languages: ['English', 'Swedish', 'Spanish'],
+            age_pref: 'high_school',
+            meeting_pref: 'either',
+            max_students: 2,
+          },
+          score: 72,
+          reasons: ['2 shared interests', 'Perfect education match (High School)', '3 common languages'],
+        },
+        {
+          mentor: {
+            id: 'mock-3',
+            first_name: 'Emma',
+            last_name: 'Karlsson',
+            role: 'Data Scientist',
+            employer: 'Ericsson',
+            bio: 'Making data science accessible to everyone. Former teacher, now in tech.',
+            skills: ['Data Analysis', 'Statistics', 'Python', 'Science', 'Mathematics'],
+            hobbies: ['Reading', 'Pets', 'Nature & Outdoors'],
+            languages: ['English', 'Swedish'],
+            age_pref: 'any',
+            meeting_pref: 'online',
+            max_students: 4,
+          },
+          score: 68,
+          reasons: ['1 matching subject', '2 common languages', 'Meeting preference match', 'Education level compatible'],
+        },
+      ] : scoredMatches;
+      
+      setAvailableMatches(mockMentors); // Show ALL matches
 
       const received = invites?.filter(inv => 
         inv.created_by !== 'student' && 
