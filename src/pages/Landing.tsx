@@ -271,11 +271,8 @@ const Landing = () => {
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <div>
               <img src={logo} alt="GuidEd" className="h-8 mb-4" />
-              <p className="text-sm text-muted-foreground mb-2">
+              <p className="text-sm text-muted-foreground">
                 AI mentorship that guides students toward their dreams.
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Inspired by My Dream Now
               </p>
             </div>
             <div>
@@ -289,8 +286,14 @@ const Landing = () => {
             </div>
             <div>
               <h4 className="font-bold mb-4">Get Involved</h4>
+              <Link to="/onboarding/student" className="block text-sm text-muted-foreground hover:text-primary mb-2 transition-colors">
+                Become a Student →
+              </Link>
               <Link to="/onboarding/mentor" className="block text-sm text-muted-foreground hover:text-primary mb-2 transition-colors">
                 Become a Mentor →
+              </Link>
+              <Link to="/onboarding/facilitator" className="block text-sm text-muted-foreground hover:text-primary mb-2 transition-colors">
+                Become a Facilitator →
               </Link>
             </div>
           </div>
