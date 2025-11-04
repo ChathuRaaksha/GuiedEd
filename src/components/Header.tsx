@@ -7,12 +7,29 @@ import logo from "@/assets/logo.png";
 export const Header = () => {
   const { user, profile, signOut } = useAuth();
 
+  const scrollToTeam = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const teamSection = document.getElementById('team');
+    if (teamSection) {
+      teamSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <header className="border-b border-border sticky top-0 bg-background/95 backdrop-blur-sm z-50">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link to="/">
-          <img src={logo} alt="GuidEd" className="h-10" />
-        </Link>
+        <div className="flex items-center gap-8">
+          <Link to="/">
+            <img src={logo} alt="GuidEd" className="h-10" />
+          </Link>
+          <a 
+            href="#team" 
+            onClick={scrollToTeam}
+            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+          >
+            Team
+          </a>
+        </div>
         <nav className="flex items-center gap-4">
           {user && profile ? (
             <>
