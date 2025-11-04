@@ -1,9 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Brand Design System
+   Pink #E5007D, Blue #3A7AFE, White #FFFFFF, Light Gray #F7F7F7, Text Gray #2B2B2B
+   Font: Plus Jakarta Sans
+   Rounded corners, generous spacing, smooth hovers, subtle micro animations
 */
 
 @layer base {
@@ -17,16 +21,16 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 17%;
 
-    --primary: 330 100% 45%;
+    --primary: 329 100% 45%; /* Pink #E5007D */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 97%;
+    --secondary: 0 0% 97%; /* Light Gray #F7F7F7 */
     --secondary-foreground: 0 0% 17%;
 
     --muted: 0 0% 97%;
     --muted-foreground: 0 0% 45%;
 
-    --accent: 223 99% 62%;
+    --accent: 218 100% 61%; /* Blue #3A7AFE */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -34,7 +38,7 @@ All colors MUST be HSL.
 
     --border: 0 0% 90%;
     --input: 0 0% 90%;
-    --ring: 330 100% 45%;
+    --ring: 329 100% 45%;
 
     --radius: 1rem;
     
@@ -67,7 +71,7 @@ All colors MUST be HSL.
     --popover: 0 0% 12%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 330 100% 45%;
+    --primary: 329 100% 45%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 15%;
@@ -76,7 +80,7 @@ All colors MUST be HSL.
     --muted: 0 0% 15%;
     --muted-foreground: 0 0% 60%;
 
-    --accent: 223 99% 62%;
+    --accent: 218 100% 61%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62% 50%;
@@ -84,7 +88,7 @@ All colors MUST be HSL.
 
     --border: 0 0% 20%;
     --input: 0 0% 20%;
-    --ring: 330 100% 45%;
+    --ring: 329 100% 45%;
     --sidebar-background: 0 0% 10%;
     --sidebar-foreground: 0 0% 95%;
     --sidebar-primary: 330 100% 45%;
@@ -102,7 +106,8 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground font-jakarta;
+    @apply bg-background text-foreground;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   }
 }
 
