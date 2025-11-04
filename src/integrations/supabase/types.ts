@@ -179,6 +179,7 @@ export type Database = {
           id: string
           languages: string[]
           last_name: string
+          linkedin_url: string | null
           max_students: number
           meeting_pref: string
           postcode: string | null
@@ -203,6 +204,7 @@ export type Database = {
           id?: string
           languages?: string[]
           last_name: string
+          linkedin_url?: string | null
           max_students?: number
           meeting_pref?: string
           postcode?: string | null
@@ -227,6 +229,7 @@ export type Database = {
           id?: string
           languages?: string[]
           last_name?: string
+          linkedin_url?: string | null
           max_students?: number
           meeting_pref?: string
           postcode?: string | null

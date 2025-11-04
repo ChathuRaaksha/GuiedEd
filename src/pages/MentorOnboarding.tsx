@@ -66,9 +66,10 @@ const LANGUAGE_OPTIONS = [
 ];
 
 const EDUCATION_LEVELS = [
-  { value: "middle_school", label: "Middle School" },
   { value: "high_school", label: "High School" },
-  { value: "university", label: "University" },
+  { value: "bachelor", label: "Bachelor" },
+  { value: "master", label: "Master" },
+  { value: "phd", label: "PhD" },
 ];
 
 const SWEDISH_CITIES = [
