@@ -68,7 +68,8 @@ const Landing = () => {
             </span>
           </div>
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-            <span className="text-primary">AI matching mentorship</span>
+            AI mentorship that guides students toward their{" "}
+            <span className="text-primary">dreams</span>
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground mb-10 max-w-2xl mx-auto">
             Students share interests. GuidEd connects them with mentors. Ed assists the journey and a facilitator supervises.
