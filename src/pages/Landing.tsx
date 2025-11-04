@@ -1,9 +1,16 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Users, Sparkles, Heart, CheckCircle } from "lucide-react";
+import { ArrowRight, Users, Sparkles, Heart, CheckCircle, Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 import logo from "@/assets/logo.png";
 import edIcon from "@/assets/ed-icon.png";
+import jadyPhoto from "@/assets/team/jady.jpg";
+import phuwitPhoto from "@/assets/team/phuwit.jpg";
+import mariaPhoto from "@/assets/team/maria.png";
+import rezaPhoto from "@/assets/team/reza.jpg";
+import tobiasPhoto from "@/assets/team/tobias.jpeg";
+import praneetPhoto from "@/assets/team/praneet.jpeg";
+import supunPhoto from "@/assets/team/supun.jpg";
 
 const Landing = () => {
   return <div className="min-h-screen bg-background">
@@ -151,6 +158,59 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Team Section */}
+      <section className="bg-secondary/30 py-20 border-t border-border">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+              <span className="text-primary">The Dream Team:</span>{" "}
+              <span className="text-accent">SU Heroes</span>
+            </h2>
+            <p className="text-center text-muted-foreground mb-12 max-w-3xl mx-auto text-lg">
+              We are SU Heroes, a multidisciplinary team from Stockholm University who joined forces during the CHAS Academy AI-Assisted Workflow Coding Hackathon. Our shared mission is to make mentorship more accessible, inclusive, and fun through technology and human connection.
+            </p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {[
+                { name: "Jady Pamella", role: "AI, Cybersecurity & IT Consultant", linkedin: "https://linkedin.com/in/jadypamella", photo: jadyPhoto },
+                { name: "Phuwit Vititayanon", role: "Data Scientist & AI Maker", linkedin: "https://linkedin.com/in/phuwit-vititayanon-4b6503157", photo: phuwitPhoto },
+                { name: "Maria Hellsen", role: "AI Business Consultant & Frontend Development Student", linkedin: "https://linkedin.com/in/maria-hellsen-9805723", photo: mariaPhoto },
+                { name: "Reza Rezvani", role: "Partnership Manager at My Dream Now", linkedin: "https://linkedin.com/in/reza-rezvani-bb699011b", photo: rezaPhoto },
+                { name: "Tobias Nilsson", role: "Independent Consultant in Business & Requirements Analysis", linkedin: "https://linkedin.com/in/tobiasnilsson75", photo: tobiasPhoto },
+                { name: "Praneet Kala", role: "Digitalisation, Workflow Automation & Storytelling", linkedin: "https://linkedin.com/in/praneet-kala-0b165678", photo: praneetPhoto },
+                { name: "Supun Chathuranga", role: "AI & Fullstack Engineer", linkedin: "https://linkedin.com/in/supun-chathuranga-190372148", photo: supunPhoto },
+              ].map((member, index) => (
+                <div
+                  key={index}
+                  className="bg-card p-6 rounded-3xl text-center card-hover group"
+                >
+                  <div className="relative w-32 h-32 mx-auto mb-4">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-xl" />
+                    <img
+                      src={member.photo}
+                      alt={member.name}
+                      className="w-full h-full rounded-full object-cover border-4 border-background shadow-lg relative z-10"
+                    />
+                  </div>
+                  <h3 className="font-bold text-lg mb-2">{member.name}</h3>
+                  <p className="text-sm text-muted-foreground mb-4 min-h-[2.5rem]">
+                    {member.role}
+                  </p>
+                  <a
+                    href={member.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-accent hover:text-primary transition-colors"
+                  >
+                    <Linkedin className="w-5 h-5" />
+                    <span className="text-sm font-medium">LinkedIn</span>
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Inspiration Section */}
       <section className="container mx-auto px-4 py-20">
         <div className="max-w-4xl mx-auto">
@@ -183,12 +243,20 @@ const Landing = () => {
               </p>
             </div>
             <div>
+              <h4 className="font-bold mb-4">Quick Links</h4>
+              <a href="#team" className="block text-sm text-muted-foreground hover:text-primary mb-2 transition-colors">
+                Team
+              </a>
+              <Link to="/auth/register" className="block text-sm text-muted-foreground hover:text-primary mb-2 transition-colors">
+                Get Started
+              </Link>
+            </div>
+            <div>
               <h4 className="font-bold mb-4">Get Involved</h4>
               <Link to="/onboarding/mentor" className="block text-sm text-muted-foreground hover:text-primary mb-2 transition-colors">
                 Become a Mentor →
               </Link>
             </div>
-            
           </div>
           <div className="border-t border-border mt-8 pt-8 text-center">
             <p className="text-sm text-muted-foreground">© 2025 GuidEd. All rights reserved.</p>
