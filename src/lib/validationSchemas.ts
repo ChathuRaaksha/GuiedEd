@@ -14,6 +14,7 @@ export const studentOnboardingSchema = z.object({
   subjects: z.array(z.string()).min(1, 'Select at least one subject'),
   interests: z.array(z.string()).min(1, 'Select at least one interest'),
   goals: z.string().max(500, 'Goals must be less than 500 characters').optional(),
+  talkAboutYourself: z.string().max(500, 'Talk about yourself must be less than 500 characters').optional(),
   meetingPref: z.string().refine(val => ['online', 'in_person', 'either'].includes(val), {
     message: 'Please select a valid meeting preference',
   }),
@@ -31,6 +32,7 @@ export const mentorOnboardingSchema = z.object({
   employer: z.string().max(100).optional(),
   role: z.string().max(100).optional(),
   bio: z.string().max(500, 'Bio must be less than 500 characters').optional(),
+  talkAboutYourself: z.string().max(500, 'Talk about yourself must be less than 500 characters').optional(),
   skills: z.array(z.string()).min(1, 'Select at least one skill'),
   hobbies: z.array(z.string()).optional(),
   languages: z.array(z.string()).min(1, 'Select at least one language'),

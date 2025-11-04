@@ -50,6 +50,18 @@ const LANGUAGE_OPTIONS = [
   "Mandarin",
   "Swedish",
   "Arabic",
+  "Portuguese",
+  "Italian",
+  "Russian",
+  "Japanese",
+  "Korean",
+  "Hindi",
+  "Dutch",
+  "Polish",
+  "Turkish",
+  "Norwegian",
+  "Danish",
+  "Finnish",
   "Other",
 ];
 
@@ -89,6 +101,7 @@ const MentorOnboarding = () => {
     employer: "",
     role: "",
     bio: "",
+    talkAboutYourself: "",
     skills: [] as string[],
     hobbies: [] as string[],
     languages: [] as string[],
@@ -162,6 +175,7 @@ const MentorOnboarding = () => {
           employer: validated.employer || null,
           role: validated.role || null,
           bio: validated.bio || null,
+          talk_about_yourself: validated.talkAboutYourself || null,
           skills: validated.skills,
           hobbies: validated.hobbies || [],
           languages: validated.languages,
@@ -321,6 +335,18 @@ const MentorOnboarding = () => {
                     value={formData.bio}
                     onChange={(e) => handleInputChange("bio", e.target.value)}
                     placeholder="Tell us about yourself and why you want to be a mentor..."
+                    className="mt-1 min-h-[100px] rounded-xl"
+                    maxLength={500}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="talkAboutYourself">Talk about yourself</Label>
+                  <Textarea
+                    id="talkAboutYourself"
+                    value={formData.talkAboutYourself}
+                    onChange={(e) => handleInputChange("talkAboutYourself", e.target.value)}
+                    placeholder="Share more about your interests, hobbies, and personality..."
                     className="mt-1 min-h-[100px] rounded-xl"
                     maxLength={500}
                   />

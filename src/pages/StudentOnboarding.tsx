@@ -47,6 +47,18 @@ const LANGUAGE_OPTIONS = [
   "Mandarin",
   "Swedish",
   "Arabic",
+  "Portuguese",
+  "Italian",
+  "Russian",
+  "Japanese",
+  "Korean",
+  "Hindi",
+  "Dutch",
+  "Polish",
+  "Turkish",
+  "Norwegian",
+  "Danish",
+  "Finnish",
   "Other",
 ];
 
@@ -89,6 +101,7 @@ const StudentOnboarding = () => {
     subjects: [] as string[],
     interests: [] as string[],
     goals: "",
+    talkAboutYourself: "",
     meetingPref: "online",
     consent: false,
   });
@@ -154,6 +167,7 @@ const StudentOnboarding = () => {
         subjects: validatedData.subjects,
         interests: validatedData.interests,
         goals: validatedData.goals || null,
+        bio: validatedData.talkAboutYourself || null,
         meeting_pref: validatedData.meetingPref,
       });
 
@@ -372,6 +386,18 @@ const StudentOnboarding = () => {
                   value={formData.goals}
                   onChange={(e) => handleInputChange("goals", e.target.value)}
                   placeholder="Tell me what you want to achieve... (e.g., explore careers in tech, improve leadership skills)"
+                  className="mt-1 min-h-[100px] rounded-xl"
+                  maxLength={500}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="talkAboutYourself">Talk about yourself</Label>
+                <Textarea
+                  id="talkAboutYourself"
+                  value={formData.talkAboutYourself}
+                  onChange={(e) => handleInputChange("talkAboutYourself", e.target.value)}
+                  placeholder="Share something about yourself... (e.g., your hobbies, what you enjoy doing)"
                   className="mt-1 min-h-[100px] rounded-xl"
                   maxLength={500}
                 />
