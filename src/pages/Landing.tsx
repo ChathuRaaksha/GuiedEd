@@ -50,6 +50,7 @@ const Landing = () => {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 md:py-32">
         <div className="max-w-4xl mx-auto text-center">
+          <img src={logo} alt="GuidEd" className="h-16 md:h-20 mx-auto mb-8" />
           <div className="inline-block mb-6">
             <span className="tag-chip bg-accent/10 text-accent">
               <Sparkles className="w-4 h-4" />
