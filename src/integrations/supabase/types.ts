@@ -173,6 +173,7 @@ export type Database = {
           bio: string | null
           city: string | null
           created_at: string
+          cv_data: Json | null
           cv_url: string | null
           education_level: string | null
           email: string
@@ -198,6 +199,7 @@ export type Database = {
           bio?: string | null
           city?: string | null
           created_at?: string
+          cv_data?: Json | null
           cv_url?: string | null
           education_level?: string | null
           email: string
@@ -223,6 +225,7 @@ export type Database = {
           bio?: string | null
           city?: string | null
           created_at?: string
+          cv_data?: Json | null
           cv_url?: string | null
           education_level?: string | null
           email?: string

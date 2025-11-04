@@ -77,6 +77,10 @@ const Profile = () => {
       middle_school: "Middle School",
       high_school: "High School",
       university: "University",
+      bachelor: "Bachelor",
+      master: "Master",
+      phd: "PhD",
+      any: "Any",
     };
     return labels[level] || level;
   };
@@ -312,6 +316,81 @@ const Profile = () => {
                   </div>
                 </div>
               </Card>
+
+              {profileData.cv_data && Object.keys(profileData.cv_data).length > 0 && (
+                <Card className="p-6 mb-6">
+                  <h2 className="text-xl font-bold mb-4">CV Details</h2>
+                  
+                  {profileData.cv_data.work_experience && profileData.cv_data.work_experience.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold mb-3">Work Experience</h3>
+                      <div className="space-y-4">
+                        {profileData.cv_data.work_experience.map((exp: any, idx: number) => (
+                          <div key={idx} className="border-l-2 border-primary pl-4">
+                            <h4 className="font-semibold">{exp.role} at {exp.company}</h4>
+                            <p className="text-sm text-muted-foreground">{exp.years}</p>
+                            <p className="mt-2 text-sm">{exp.description}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {profileData.cv_data.education && profileData.cv_data.education.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold mb-3">Education</h3>
+                      <div className="space-y-3">
+                        {profileData.cv_data.education.map((edu: any, idx: number) => (
+                          <div key={idx}>
+                            <h4 className="font-semibold">{edu.degree} in {edu.field}</h4>
+                            <p className="text-sm text-muted-foreground">{edu.institution} • {edu.year}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {profileData.cv_data.certifications && profileData.cv_data.certifications.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold mb-3">Certifications</h3>
+                      <div className="space-y-2">
+                        {profileData.cv_data.certifications.map((cert: any, idx: number) => (
+                          <div key={idx} className="flex flex-wrap gap-2">
+                            <Badge variant="secondary">{cert.name}</Badge>
+                            <span className="text-sm text-muted-foreground">• {cert.issuer} ({cert.year})</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {profileData.cv_data.achievements && profileData.cv_data.achievements.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold mb-3">Achievements</h3>
+                      <ul className="list-disc list-inside space-y-1 text-sm">
+                        {profileData.cv_data.achievements.map((achievement: string, idx: number) => (
+                          <li key={idx}>{achievement}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {profileData.cv_data.projects && profileData.cv_data.projects.length > 0 && (
+                    <div>
+                      <h3 className="text-lg font-semibold mb-3">Projects</h3>
+                      <div className="space-y-3">
+                        {profileData.cv_data.projects.map((project: any, idx: number) => (
+                          <div key={idx}>
+                            <h4 className="font-semibold">{project.name}</h4>
+                            <p className="text-sm text-muted-foreground mb-1">{project.year}</p>
+                            <p className="text-sm">{project.description}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </Card>
+              )}
 
               {(profileData.linkedin_url || profileData.cv_url) && (
                 <Card className="p-6 mb-6">
