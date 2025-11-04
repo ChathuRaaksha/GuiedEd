@@ -1,6 +1,6 @@
 flask==3.0.0
 flask-cors==4.0.0
 temporalio==1.5.1
-openai==1.14.0
+openai>=1.50.0
 python-dotenv==1.0.0
 requests==2.31.0
