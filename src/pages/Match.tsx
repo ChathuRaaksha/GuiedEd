@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Mail, Sparkles, CheckCircle, Loader2, X } from "lucide-react";
+import { Mail, Sparkles, CheckCircle, Loader2, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { calculateMatch, ScoredMatch } from "@/utils/matchingAlgorithm";
-import logo from "@/assets/logo.png";
+import { Header } from "@/components/Header";
 
 const Match = () => {
   const { user } = useAuth();
@@ -127,17 +127,7 @@ const Match = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border py-4">
-        <div className="container mx-auto px-4 flex items-center justify-between">
-          <img src={logo} alt="GuidEd" className="h-8" />
-          <Link to="/">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Home
-            </Button>
-          </Link>
-        </div>
-      </header>
+      <Header />
 
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">

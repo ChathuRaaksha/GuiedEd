@@ -3,12 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { User, Mail, MapPin, Briefcase, GraduationCap, Languages, Heart, Trophy, Calendar, FileText, LogOut } from "lucide-react";
+import { User, Mail, MapPin, Briefcase, GraduationCap, Languages, Heart, Trophy, Calendar, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import logo from "@/assets/logo.png";
+import { Header } from "@/components/Header";
 
 const Profile = () => {
   const { user, profile } = useAuth();
@@ -67,11 +67,6 @@ const Profile = () => {
     fetchProfile();
   }, [user, profile, navigate]);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/");
-  };
-
   const getEducationLabel = (level: string) => {
     const labels: Record<string, string> = {
       middle_school: "Middle School",
@@ -111,15 +106,7 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border py-4 sticky top-0 bg-background z-10">
-        <div className="container mx-auto px-4 flex justify-between items-center">
-          <img src={logo} alt="GuidEd" className="h-8 cursor-pointer" onClick={() => navigate("/")} />
-          <Button variant="ghost" onClick={handleLogout}>
-            <LogOut className="w-4 h-4 mr-2" />
-            Logout
-          </Button>
-        </div>
-      </header>
+      <Header />
 
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
