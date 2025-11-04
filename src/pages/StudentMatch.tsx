@@ -81,7 +81,7 @@ const StudentMatch = () => {
 
       const availableMentors = mentors?.filter(m => !rejectedMentorIds.has(m.id)) || [];
       const scoredMatches = calculateMatch(studentData, availableMentors);
-      setAvailableMatches(scoredMatches.slice(0, 5)); // Top 5 matches
+      setAvailableMatches(scoredMatches); // Show ALL matches
 
       const received = invites?.filter(inv => 
         inv.created_by !== 'student' && 
