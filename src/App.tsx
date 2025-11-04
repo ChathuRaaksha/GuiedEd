@@ -14,7 +14,6 @@ import FacilitatorOnboarding from "./pages/FacilitatorOnboarding";
 import StudentMatch from "./pages/StudentMatch";
 import MentorMatches from "./pages/MentorMatches";
 import FacilitatorMatches from "./pages/FacilitatorMatches";
-import Match from "./pages/Match";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
@@ -85,14 +84,6 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={['FACILITATOR']}>
                   <FacilitatorMatches />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/old-match"
-              element={
-                <ProtectedRoute>
-                  <Match />
                 </ProtectedRoute>
               }
             />
