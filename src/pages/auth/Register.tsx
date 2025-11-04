@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
@@ -29,6 +29,11 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Auto logout when accessing register page
+    supabase.auth.signOut();
+  }, []);
 
   const roles = [
     {
@@ -113,7 +118,9 @@ export default function Register() {
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-primary/10 via-accent/10 to-primary/10">
       <div className="w-full max-w-4xl">
         <div className="text-center mb-8">
-          <img src={logo} alt="GuidEd" className="h-12 mx-auto mb-4" />
+          <Link to="/">
+            <img src={logo} alt="GuidEd" className="h-12 mx-auto mb-4 cursor-pointer hover:opacity-80 transition-opacity" />
+          </Link>
           <h1 className="text-3xl font-bold mb-2">Create your account</h1>
           <p className="text-muted-foreground">Choose your role to get started</p>
         </div>

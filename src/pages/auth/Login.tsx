@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,6 +18,11 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Auto logout when accessing login page
+    supabase.auth.signOut();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,7 +66,9 @@ export default function Login() {
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
-            <img src={logo} alt="GuidEd" className="h-12 mx-auto mb-8" />
+            <Link to="/">
+              <img src={logo} alt="GuidEd" className="h-12 mx-auto mb-8 cursor-pointer hover:opacity-80 transition-opacity" />
+            </Link>
             <h1 className="text-3xl font-bold mb-2">Welcome back</h1>
             <p className="text-muted-foreground">Sign in to your account to continue</p>
           </div>
