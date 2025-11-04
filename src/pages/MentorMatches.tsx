@@ -14,6 +14,7 @@ import { ScoreBar } from "@/components/match/ScoreBar";
 import { ReasonChips } from "@/components/match/ReasonChips";
 import { MeetingModal } from "@/components/match/MeetingModal";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EdAIBanner } from "@/components/match/EdAIBanner";
 
 const MentorMatches = () => {
   const { user, profile } = useAuth();
@@ -213,6 +214,8 @@ const MentorMatches = () => {
               )}
             </div>
           </div>
+
+          <EdAIBanner />
 
           <Tabs defaultValue="proposals" className="space-y-6">
             <TabsList>

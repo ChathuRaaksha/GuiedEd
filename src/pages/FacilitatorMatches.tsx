@@ -14,6 +14,7 @@ import { ScoreBar } from "@/components/match/ScoreBar";
 import { ReasonChips } from "@/components/match/ReasonChips";
 import { MeetingModal } from "@/components/match/MeetingModal";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EdAIBanner } from "@/components/match/EdAIBanner";
 
 const FacilitatorMatches = () => {
   const { user, profile } = useAuth();
@@ -200,6 +201,8 @@ const FacilitatorMatches = () => {
               </span>
             </div>
           </div>
+
+          <EdAIBanner />
 
           <div className="mb-6 flex gap-4">
             <div className="flex items-center gap-2">

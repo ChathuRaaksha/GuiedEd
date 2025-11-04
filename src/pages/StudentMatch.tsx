@@ -15,6 +15,7 @@ import { ScoreBar } from "@/components/match/ScoreBar";
 import { ReasonChips } from "@/components/match/ReasonChips";
 import { MeetingModal } from "@/components/match/MeetingModal";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EdAIBanner } from "@/components/match/EdAIBanner";
 
 const StudentMatch = () => {
   const { user, profile } = useAuth();
@@ -237,6 +238,8 @@ const StudentMatch = () => {
               )}
             </div>
           </div>
+
+          <EdAIBanner />
 
           <Tabs defaultValue="discover" className="space-y-6">
             <TabsList>
