@@ -392,23 +392,10 @@ const StudentMatch = () => {
 
                         <div className="md:w-40 flex flex-col gap-3">
                           {alreadySent ? (
-                            <>
-                              <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 font-semibold text-sm">
-                                <CheckCircle className="w-5 h-5" />
-                                <span>Invite Sent</span>
-                              </div>
-                              {isMock && (
-                                <Button
-                                  onClick={() => handleDismissMock(match.mentor.id)}
-                                  variant="outline"
-                                  size="sm"
-                                  className="w-full gap-2"
-                                >
-                                  <X className="w-4 h-4" />
-                                  Dismiss
-                                </Button>
-                              )}
-                            </>
+                            <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 font-semibold text-sm">
+                              <CheckCircle className="w-5 h-5" />
+                              <span>Invite Sent</span>
+                            </div>
                           ) : (
                             <Button
                               onClick={() => handleSendInvite(match.mentor.id, match.score, match.reasons)}
@@ -416,6 +403,25 @@ const StudentMatch = () => {
                             >
                               <Mail className="w-4 h-4" />
                               Send Invite
+                            </Button>
+                          )}
+                          
+                          {isMock && (
+                            <Button
+                              onClick={() => {
+                                if (alreadySent) {
+                                  toast.error("Invite sent, cannot dismiss");
+                                } else {
+                                  handleDismissMock(match.mentor.id);
+                                }
+                              }}
+                              variant="outline"
+                              size="sm"
+                              disabled={alreadySent}
+                              className="w-full gap-2"
+                            >
+                              <X className="w-4 h-4" />
+                              Dismiss
                             </Button>
                           )}
                         </div>
