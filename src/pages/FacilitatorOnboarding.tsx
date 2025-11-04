@@ -168,31 +168,32 @@ const FacilitatorOnboarding = () => {
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="city">City *</Label>
-              <Select value={formData.city} onValueChange={(value) => handleInputChange("city", value)}>
-                <SelectTrigger className="mt-1 rounded-xl">
-                  <SelectValue placeholder="Select city" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SWEDISH_CITIES.map((city) => (
-                    <SelectItem key={city} value={city}>
-                      {city}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="postcode">Postcode *</Label>
-              <Input
-                id="postcode"
-                value={formData.postcode}
-                onChange={(e) => handleInputChange("postcode", e.target.value)}
-                placeholder="e.g., 123 45"
-                className="mt-1 rounded-xl"
-              />
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="postcode">Postcode *</Label>
+                <Input
+                  id="postcode"
+                  value={formData.postcode}
+                  onChange={(e) => handleInputChange("postcode", e.target.value)}
+                  placeholder="e.g., 123 45"
+                  className="mt-1 rounded-xl"
+                />
+              </div>
+              <div>
+                <Label htmlFor="city">City *</Label>
+                <Select value={formData.city} onValueChange={(value) => handleInputChange("city", value)}>
+                  <SelectTrigger className="mt-1 rounded-xl">
+                    <SelectValue placeholder="Select city" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SWEDISH_CITIES.map((city) => (
+                      <SelectItem key={city} value={city}>
+                        {city}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div>
