@@ -26,6 +26,7 @@ export type Database = {
           org: string | null
           role: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           city?: string | null
@@ -38,6 +39,7 @@ export type Database = {
           org?: string | null
           role?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           city?: string | null
@@ -50,12 +52,24 @@ export type Database = {
           org?: string | null
           role?: string | null
           updated_at?: string
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "facilitators_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       invites: {
         Row: {
+          accepted_by_mentor: boolean | null
+          accepted_by_student: boolean | null
           created_at: string
+          created_by: string | null
           id: string
           mentor_id: string
           reasons: string[] | null
@@ -65,7 +79,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          accepted_by_mentor?: boolean | null
+          accepted_by_student?: boolean | null
           created_at?: string
+          created_by?: string | null
           id?: string
           mentor_id: string
           reasons?: string[] | null
@@ -75,7 +92,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          accepted_by_mentor?: boolean | null
+          accepted_by_student?: boolean | null
           created_at?: string
+          created_by?: string | null
           id?: string
           mentor_id?: string
           reasons?: string[] | null
@@ -101,6 +121,45 @@ export type Database = {
           },
         ]
       }
+      meetings: {
+        Row: {
+          created_at: string
+          ends_at: string
+          facilitator_id: string | null
+          id: string
+          location: string
+          mentor_id: string
+          notes: string | null
+          starts_at: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at: string
+          facilitator_id?: string | null
+          id?: string
+          location: string
+          mentor_id: string
+          notes?: string | null
+          starts_at: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string
+          facilitator_id?: string | null
+          id?: string
+          location?: string
+          mentor_id?: string
+          notes?: string | null
+          starts_at?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       mentors: {
         Row: {
           age_pref: string | null
@@ -110,6 +169,7 @@ export type Database = {
           email: string
           employer: string | null
           first_name: string
+          hobbies: string[] | null
           id: string
           languages: string[]
           last_name: string
@@ -118,6 +178,7 @@ export type Database = {
           role: string | null
           skills: string[]
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           age_pref?: string | null
@@ -127,6 +188,7 @@ export type Database = {
           email: string
           employer?: string | null
           first_name: string
+          hobbies?: string[] | null
           id?: string
           languages?: string[]
           last_name: string
@@ -135,6 +197,7 @@ export type Database = {
           role?: string | null
           skills?: string[]
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           age_pref?: string | null
@@ -144,6 +207,7 @@ export type Database = {
           email?: string
           employer?: string | null
           first_name?: string
+          hobbies?: string[] | null
           id?: string
           languages?: string[]
           last_name?: string
@@ -151,6 +215,42 @@ export type Database = {
           meeting_pref?: string
           role?: string | null
           skills?: string[]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentors_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          photo_url: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id: string
+          photo_url?: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          photo_url?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
         }
         Relationships: []
@@ -171,7 +271,9 @@ export type Database = {
           last_name: string
           meeting_pref: string
           school: string | null
+          subjects: string[] | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           availability?: string[] | null
@@ -188,7 +290,9 @@ export type Database = {
           last_name: string
           meeting_pref?: string
           school?: string | null
+          subjects?: string[] | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           availability?: string[] | null
@@ -205,19 +309,35 @@ export type Database = {
           last_name?: string
           meeting_pref?: string
           school?: string | null
+          subjects?: string[] | null
           updated_at?: string
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "students_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "STUDENT" | "MENTOR" | "FACILITATOR"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -344,6 +464,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["STUDENT", "MENTOR", "FACILITATOR"],
+    },
   },
 } as const

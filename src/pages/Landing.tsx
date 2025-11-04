@@ -1,24 +1,48 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Users, Sparkles, Heart, CheckCircle } from "lucide-react";
+import { ArrowRight, Users, Sparkles, Heart, CheckCircle, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import logo from "@/assets/logo.png";
 import edIcon from "@/assets/ed-icon.png";
+
 const Landing = () => {
+  const { user, profile, signOut } = useAuth();
+
   return <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border sticky top-0 bg-background/95 backdrop-blur-sm z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <img src={logo} alt="GuidEd" className="h-10" />
           <nav className="hidden md:flex items-center gap-6">
-            <Link to="/onboarding/student" className="text-sm font-medium hover:text-primary transition-colors">
-              Start as Student
-            </Link>
-            <Link to="/onboarding/mentor" className="text-sm font-medium hover:text-primary transition-colors">
-              Become a Mentor
-            </Link>
-            <Link to="/onboarding/facilitator" className="text-sm font-medium hover:text-primary transition-colors">
-              For Facilitators
-            </Link>
+            {user && profile ? (
+              <>
+                <span className="text-sm font-medium px-4 py-2 rounded-full bg-primary/10 text-primary">
+                  {profile.role}
+                </span>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={signOut}
+                  className="gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link to="/auth/login">
+                  <Button variant="ghost" size="sm">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link to="/auth/register">
+                  <Button size="sm" className="rounded-full">
+                    Get Started
+                  </Button>
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       </header>
@@ -40,13 +64,13 @@ const Landing = () => {
             Students share interests. GuidEd connects them with mentors. Ed assists the journey and a facilitator supervises.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/onboarding/student">
+            <Link to="/auth/register">
               <Button size="lg" className="btn-primary group">
                 Start as Student
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
-            <Link to="/onboarding/mentor">
+            <Link to="/auth/register">
               <Button size="lg" variant="outline" className="rounded-full px-8 py-6 text-base">
                 Join as Mentor
               </Button>
