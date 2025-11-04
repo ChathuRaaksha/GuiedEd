@@ -105,20 +105,41 @@ function findFirstOverlap(studentAvail?: string[], mentorAvail?: string[]): stri
 }
 
 export function calculateMatch(student: Student, mentors: Mentor[]): ScoredMatch[] {
+  console.log('🔍 Starting match calculation');
+  console.log('Student:', { 
+    interests: student.interests, 
+    subjects: student.subjects, 
+    languages: student.languages,
+    education: student.education_level 
+  });
+  console.log('Mentors count:', mentors.length);
+
   const scoredMatches = mentors.map((mentor) => {
     let score = 0;
     const reasons: string[] = [];
+
+    console.log(`Checking mentor: ${mentor.first_name} ${mentor.last_name}`);
+    console.log('Mentor data:', { 
+      skills: mentor.skills, 
+      languages: mentor.languages,
+      age_pref: mentor.age_pref 
+    });
 
     // Hard filters first
     const hasCommonLanguage = student.languages.some(lang =>
       mentor.languages.includes(lang)
     );
     
+    console.log('Common language?', hasCommonLanguage);
+    
     // Education level preference filter
     const educationMatch = mentor.age_pref === 'any' || 
                            mentor.age_pref === student.education_level;
 
+    console.log('Education match?', educationMatch, mentor.age_pref, student.education_level);
+
     if (!hasCommonLanguage || !educationMatch) {
+      console.log('❌ Failed hard filters');
       return { mentor, score: 0, reasons: ['Not compatible'] };
     }
 
@@ -177,6 +198,8 @@ export function calculateMatch(student: Student, mentors: Mentor[]): ScoredMatch
       reasons.push(`Available ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`);
     }
 
+    console.log(`Final score for ${mentor.first_name}: ${score}`);
+
     return {
       mentor,
       score: Math.round(score),
@@ -185,8 +208,14 @@ export function calculateMatch(student: Student, mentors: Mentor[]): ScoredMatch
     };
   });
 
+  console.log('All matches:', scoredMatches.map(m => ({ name: `${m.mentor.first_name} ${m.mentor.last_name}`, score: m.score })));
+
   // Sort by score descending and return matches above threshold (lowered for flexible matching)
-  return scoredMatches
+  const filtered = scoredMatches
     .filter((match) => match.score >= 20) // Minimum 20% match with AI-powered flexible matching
     .sort((a, b) => b.score - a.score);
+
+  console.log('✅ Filtered matches (>= 20):', filtered.map(m => ({ name: `${m.mentor.first_name} ${m.mentor.last_name}`, score: m.score })));
+
+  return filtered;
 }
