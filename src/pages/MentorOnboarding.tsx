@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -52,6 +53,29 @@ const LANGUAGE_OPTIONS = [
   "Other",
 ];
 
+const EDUCATION_LEVELS = [
+  { value: "middle_school", label: "Middle School" },
+  { value: "high_school", label: "High School" },
+  { value: "university", label: "University" },
+];
+
+const SWEDISH_CITIES = [
+  "Stockholm",
+  "Gothenburg",
+  "Malmö",
+  "Uppsala",
+  "Västerås",
+  "Örebro",
+  "Linköping",
+  "Helsingborg",
+  "Jönköping",
+  "Norrköping",
+  "Lund",
+  "Umeå",
+  "Gävle",
+  "Other",
+];
+
 const MentorOnboarding = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
@@ -59,13 +83,15 @@ const MentorOnboarding = () => {
     firstName: "",
     lastName: "",
     email: profile?.email || "",
+    educationLevel: "",
+    city: "",
     employer: "",
     role: "",
     bio: "",
     skills: [] as string[],
     hobbies: [] as string[],
     languages: [] as string[],
-    agePref: "either",
+    agePref: "any",
     meetingPref: "either",
     maxStudents: "3",
     linkedinUrl: "",
@@ -104,6 +130,8 @@ const MentorOnboarding = () => {
           first_name: validated.firstName,
           last_name: validated.lastName,
           email: validated.email,
+          education_level: validated.educationLevel || null,
+          city: validated.city,
           employer: validated.employer || null,
           role: validated.role || null,
           bio: validated.bio || null,
@@ -174,6 +202,39 @@ const MentorOnboarding = () => {
                       placeholder="Your last name"
                       className="mt-1 rounded-xl"
                     />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="educationLevel">Education Level</Label>
+                    <Select value={formData.educationLevel} onValueChange={(value) => handleInputChange("educationLevel", value)}>
+                      <SelectTrigger className="mt-1 rounded-xl">
+                        <SelectValue placeholder="Select level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {EDUCATION_LEVELS.map((level) => (
+                          <SelectItem key={level.value} value={level.value}>
+                            {level.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="city">City *</Label>
+                    <Select value={formData.city} onValueChange={(value) => handleInputChange("city", value)}>
+                      <SelectTrigger className="mt-1 rounded-xl">
+                        <SelectValue placeholder="Select city" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SWEDISH_CITIES.map((city) => (
+                          <SelectItem key={city} value={city}>
+                            {city}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
@@ -297,40 +358,51 @@ const MentorOnboarding = () => {
               <h2 className="text-2xl font-bold mb-6">Mentoring Preferences</h2>
               <div className="space-y-6">
                 <div>
-                  <Label className="mb-3 block">Preferred Student Age/Grade</Label>
-                  <div className="grid grid-cols-3 gap-3">
+                  <Label className="mb-3 block">Student Education Level Preference</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <button
                       type="button"
-                      onClick={() => handleInputChange("agePref", "8")}
+                      onClick={() => handleInputChange("agePref", "middle_school")}
                       className={`p-4 rounded-xl border-2 transition-all ${
-                        formData.agePref === "8"
+                        formData.agePref === "middle_school"
                           ? "border-primary bg-primary/5"
                           : "border-border hover:border-primary/50"
                       }`}
                     >
-                      <div className="font-medium">Grade 8</div>
+                      <div className="font-medium">Middle School</div>
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleInputChange("agePref", "9")}
+                      onClick={() => handleInputChange("agePref", "high_school")}
                       className={`p-4 rounded-xl border-2 transition-all ${
-                        formData.agePref === "9"
+                        formData.agePref === "high_school"
                           ? "border-primary bg-primary/5"
                           : "border-border hover:border-primary/50"
                       }`}
                     >
-                      <div className="font-medium">Grade 9</div>
+                      <div className="font-medium">High School</div>
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleInputChange("agePref", "either")}
+                      onClick={() => handleInputChange("agePref", "university")}
                       className={`p-4 rounded-xl border-2 transition-all ${
-                        formData.agePref === "either"
+                        formData.agePref === "university"
                           ? "border-primary bg-primary/5"
                           : "border-border hover:border-primary/50"
                       }`}
                     >
-                      <div className="font-medium">Either</div>
+                      <div className="font-medium">University</div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleInputChange("agePref", "any")}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        formData.agePref === "any"
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <div className="font-medium">Any</div>
                     </button>
                   </div>
                 </div>

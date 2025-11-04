@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Shield, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -10,6 +11,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { facilitatorOnboardingSchema } from "@/lib/validationSchemas";
 import logo from "@/assets/logo.png";
+
+const SWEDISH_CITIES = [
+  "Stockholm",
+  "Gothenburg",
+  "Malmö",
+  "Uppsala",
+  "Västerås",
+  "Örebro",
+  "Linköping",
+  "Helsingborg",
+  "Jönköping",
+  "Norrköping",
+  "Lund",
+  "Umeå",
+  "Gävle",
+  "Other",
+];
 
 const FacilitatorOnboarding = () => {
   const navigate = useNavigate();
@@ -150,13 +168,18 @@ const FacilitatorOnboarding = () => {
 
             <div>
               <Label htmlFor="city">City *</Label>
-              <Input
-                id="city"
-                value={formData.city}
-                onChange={(e) => handleInputChange("city", e.target.value)}
-                placeholder="Where are you based?"
-                className="mt-1 rounded-xl"
-              />
+              <Select value={formData.city} onValueChange={(value) => handleInputChange("city", value)}>
+                <SelectTrigger className="mt-1 rounded-xl">
+                  <SelectValue placeholder="Select city" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SWEDISH_CITIES.map((city) => (
+                    <SelectItem key={city} value={city}>
+                      {city}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>

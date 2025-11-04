@@ -4,7 +4,9 @@ export const studentOnboardingSchema = z.object({
   firstName: z.string().min(1, 'First name is required').max(50, 'First name must be less than 50 characters'),
   lastName: z.string().min(1, 'Last name is required').max(50, 'Last name must be less than 50 characters'),
   email: z.string().email('Invalid email address').max(255),
-  grade: z.number().min(8, 'Grade must be 8 or 9').max(9, 'Grade must be 8 or 9'),
+  educationLevel: z.string().refine(val => ['middle_school', 'high_school', 'university'].includes(val), {
+    message: 'Please select an education level',
+  }),
   school: z.string().min(1, 'School is required').max(100),
   city: z.string().min(1, 'City is required').max(100),
   languages: z.array(z.string()).min(1, 'Select at least one language'),
@@ -20,14 +22,18 @@ export const mentorOnboardingSchema = z.object({
   firstName: z.string().min(1, 'First name is required').max(50),
   lastName: z.string().min(1, 'Last name is required').max(50),
   email: z.string().email('Invalid email address').max(255),
+  educationLevel: z.string().refine(val => ['middle_school', 'high_school', 'university'].includes(val), {
+    message: 'Please select an education level',
+  }).optional(),
+  city: z.string().min(1, 'City is required').max(100),
   employer: z.string().max(100).optional(),
   role: z.string().max(100).optional(),
   bio: z.string().max(500, 'Bio must be less than 500 characters').optional(),
   skills: z.array(z.string()).min(1, 'Select at least one skill'),
   hobbies: z.array(z.string()).optional(),
   languages: z.array(z.string()).min(1, 'Select at least one language'),
-  agePref: z.string().refine(val => ['8', '9', 'either'].includes(val), {
-    message: 'Please select a valid age preference',
+  agePref: z.string().refine(val => ['middle_school', 'high_school', 'university', 'any'].includes(val), {
+    message: 'Please select a valid education preference',
   }),
   meetingPref: z.string().refine(val => ['online', 'in_person', 'either'].includes(val), {
     message: 'Please select a valid meeting preference',

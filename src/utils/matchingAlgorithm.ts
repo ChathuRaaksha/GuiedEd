@@ -4,7 +4,7 @@ interface Student {
   subjects: string[];
   languages: string[];
   meeting_pref: string;
-  grade: number;
+  education_level: string;
 }
 
 interface Mentor {
@@ -38,11 +38,11 @@ export function calculateMatch(student: Student, mentors: Mentor[]): ScoredMatch
       mentor.languages.includes(lang)
     );
     
-    // Age preference filter
-    const ageMatch = mentor.age_pref === 'either' || 
-                     mentor.age_pref === String(student.grade);
+    // Education level preference filter
+    const educationMatch = mentor.age_pref === 'any' || 
+                           mentor.age_pref === student.education_level;
 
-    if (!hasCommonLanguage || !ageMatch) {
+    if (!hasCommonLanguage || !educationMatch) {
       return { mentor, score: 0, reasons: ['Not compatible'] };
     }
 
@@ -76,13 +76,15 @@ export function calculateMatch(student: Student, mentors: Mentor[]): ScoredMatch
       reasons.push(`${languageOverlap} common language${languageOverlap > 1 ? 's' : ''}`);
     }
 
-    // Age preference fit (10% weight)
-    if (ageMatch) {
+    // Education level fit (10% weight)
+    if (educationMatch) {
       score += 10;
-      if (mentor.age_pref === String(student.grade)) {
-        reasons.push(`Perfect age match (Grade ${student.grade})`);
+      if (mentor.age_pref === student.education_level) {
+        const levelLabel = student.education_level === 'middle_school' ? 'Middle School' : 
+                          student.education_level === 'high_school' ? 'High School' : 'University';
+        reasons.push(`Perfect education match (${levelLabel})`);
       } else {
-        reasons.push('Age preference compatible');
+        reasons.push('Education level compatible');
       }
     }
 

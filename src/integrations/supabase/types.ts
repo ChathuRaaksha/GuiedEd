@@ -165,7 +165,9 @@ export type Database = {
           age_pref: string | null
           availability: string[] | null
           bio: string | null
+          city: string | null
           created_at: string
+          education_level: string | null
           email: string
           employer: string | null
           first_name: string
@@ -184,7 +186,9 @@ export type Database = {
           age_pref?: string | null
           availability?: string[] | null
           bio?: string | null
+          city?: string | null
           created_at?: string
+          education_level?: string | null
           email: string
           employer?: string | null
           first_name: string
@@ -203,7 +207,9 @@ export type Database = {
           age_pref?: string | null
           availability?: string[] | null
           bio?: string | null
+          city?: string | null
           created_at?: string
+          education_level?: string | null
           email?: string
           employer?: string | null
           first_name?: string
@@ -260,11 +266,11 @@ export type Database = {
           availability: string[] | null
           city: string | null
           created_at: string
+          education_level: string
           email: string
           facilitator_id: string | null
           first_name: string
           goals: string | null
-          grade: number
           id: string
           interests: string[]
           languages: string[]
@@ -279,11 +285,11 @@ export type Database = {
           availability?: string[] | null
           city?: string | null
           created_at?: string
+          education_level?: string
           email: string
           facilitator_id?: string | null
           first_name: string
           goals?: string | null
-          grade: number
           id?: string
           interests?: string[]
           languages?: string[]
@@ -298,11 +304,11 @@ export type Database = {
           availability?: string[] | null
           city?: string | null
           created_at?: string
+          education_level?: string
           email?: string
           facilitator_id?: string | null
           first_name?: string
           goals?: string | null
-          grade?: number
           id?: string
           interests?: string[]
           languages?: string[]

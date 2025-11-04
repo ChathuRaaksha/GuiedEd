@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -49,6 +50,29 @@ const LANGUAGE_OPTIONS = [
   "Other",
 ];
 
+const EDUCATION_LEVELS = [
+  { value: "middle_school", label: "Middle School" },
+  { value: "high_school", label: "High School" },
+  { value: "university", label: "University" },
+];
+
+const SWEDISH_CITIES = [
+  "Stockholm",
+  "Gothenburg",
+  "Malmö",
+  "Uppsala",
+  "Västerås",
+  "Örebro",
+  "Linköping",
+  "Helsingborg",
+  "Jönköping",
+  "Norrköping",
+  "Lund",
+  "Umeå",
+  "Gävle",
+  "Other",
+];
+
 const StudentOnboarding = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
@@ -57,7 +81,7 @@ const StudentOnboarding = () => {
     firstName: "",
     lastName: "",
     email: profile?.email || "",
-    grade: "",
+    educationLevel: "",
     school: "",
     city: "",
     languages: [] as string[],
@@ -83,7 +107,7 @@ const StudentOnboarding = () => {
 
   const handleNext = () => {
     if (step === 1) {
-      if (!formData.firstName || !formData.lastName || !formData.grade || !formData.school || !formData.city) {
+      if (!formData.firstName || !formData.lastName || !formData.educationLevel || !formData.school || !formData.city) {
         toast.error("Please fill in all required fields");
         return;
       }
@@ -103,53 +127,45 @@ const StudentOnboarding = () => {
 
   const handleSubmit = async () => {
     if (!formData.consent) {
-      toast.error("Please accept the terms to continue");
+      toast.error("Please accept the consent to continue");
       return;
     }
 
     if (!user) {
-      toast.error("You must be logged in to continue");
+      toast.error("User not authenticated");
       return;
     }
 
     try {
-      const validated = studentOnboardingSchema.parse({
-        ...formData,
-        grade: parseInt(formData.grade),
-        email: profile?.email || formData.email,
-      });
+      // Validate with Zod schema
+      const validatedData = studentOnboardingSchema.parse(formData);
 
-      const { data, error } = await supabase
-        .from("students")
-        .insert({
-          user_id: user.id,
-          first_name: validated.firstName,
-          last_name: validated.lastName,
-          email: validated.email,
-          grade: validated.grade,
-          school: validated.school,
-          city: validated.city,
-          languages: validated.languages,
-          subjects: validated.subjects,
-          interests: validated.interests,
-          goals: validated.goals || null,
-          meeting_pref: validated.meetingPref,
-        })
-        .select()
-        .single();
+      const { error } = await supabase.from("students").insert({
+        user_id: user.id,
+        first_name: validatedData.firstName,
+        last_name: validatedData.lastName,
+        email: validatedData.email,
+        education_level: validatedData.educationLevel,
+        school: validatedData.school,
+        city: validatedData.city,
+        languages: validatedData.languages,
+        subjects: validatedData.subjects,
+        interests: validatedData.interests,
+        goals: validatedData.goals || null,
+        meeting_pref: validatedData.meetingPref,
+      });
 
       if (error) throw error;
 
-      toast.success("Profile created! Finding your perfect mentor...");
-      setTimeout(() => {
-        navigate(`/match?studentId=${data.id}&name=${formData.firstName}`);
-      }, 1500);
+      toast.success("Profile created! Finding your matches...");
+      navigate("/match");
     } catch (error: any) {
-      console.error("Error creating student profile:", error);
       if (error.name === 'ZodError') {
-        toast.error(error.issues[0].message);
+        const firstError = error.errors[0];
+        toast.error(firstError.message);
       } else {
-        toast.error(error.message || "Failed to create profile. Please try again.");
+        console.error("Error saving profile:", error);
+        toast.error("Failed to save profile. Please try again.");
       }
     }
   };
@@ -216,27 +232,34 @@ const StudentOnboarding = () => {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="grade">Grade (8 or 9) *</Label>
-                  <Input
-                    id="grade"
-                    type="number"
-                    min="8"
-                    max="9"
-                    value={formData.grade}
-                    onChange={(e) => handleInputChange("grade", e.target.value)}
-                    placeholder="8 or 9"
-                    className="mt-1 rounded-xl"
-                  />
+                  <Label htmlFor="educationLevel">Education Level *</Label>
+                  <Select value={formData.educationLevel} onValueChange={(value) => handleInputChange("educationLevel", value)}>
+                    <SelectTrigger className="mt-1 rounded-xl">
+                      <SelectValue placeholder="Select level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {EDUCATION_LEVELS.map((level) => (
+                        <SelectItem key={level.value} value={level.value}>
+                          {level.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor="city">City *</Label>
-                  <Input
-                    id="city"
-                    value={formData.city}
-                    onChange={(e) => handleInputChange("city", e.target.value)}
-                    placeholder="Where do you live?"
-                    className="mt-1 rounded-xl"
-                  />
+                  <Select value={formData.city} onValueChange={(value) => handleInputChange("city", value)}>
+                    <SelectTrigger className="mt-1 rounded-xl">
+                      <SelectValue placeholder="Select city" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SWEDISH_CITIES.map((city) => (
+                        <SelectItem key={city} value={city}>
+                          {city}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
