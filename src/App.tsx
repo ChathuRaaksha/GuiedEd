@@ -11,6 +11,9 @@ import Register from "./pages/auth/Register";
 import StudentOnboarding from "./pages/StudentOnboarding";
 import MentorOnboarding from "./pages/MentorOnboarding";
 import FacilitatorOnboarding from "./pages/FacilitatorOnboarding";
+import StudentMatch from "./pages/StudentMatch";
+import MentorMatches from "./pages/MentorMatches";
+import FacilitatorMatches from "./pages/FacilitatorMatches";
 import Match from "./pages/Match";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
@@ -55,6 +58,30 @@ const App = () => (
             />
             <Route
               path="/match"
+              element={
+                <ProtectedRoute allowedRoles={['STUDENT']}>
+                  <StudentMatch />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mentor/matches"
+              element={
+                <ProtectedRoute allowedRoles={['MENTOR']}>
+                  <MentorMatches />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/facilitator/matches"
+              element={
+                <ProtectedRoute allowedRoles={['FACILITATOR']}>
+                  <FacilitatorMatches />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/old-match"
               element={
                 <ProtectedRoute>
                   <Match />

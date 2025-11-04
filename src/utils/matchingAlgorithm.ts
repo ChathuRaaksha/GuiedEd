@@ -1,10 +1,11 @@
-// Enhanced matching algorithm with new scoring weights
+// Enhanced matching algorithm with availability overlap scoring
 interface Student {
   interests: string[];
   subjects: string[];
   languages: string[];
   meeting_pref: string;
   education_level: string;
+  availability?: string[];
 }
 
 interface Mentor {
@@ -20,12 +21,30 @@ interface Mentor {
   age_pref: string;
   meeting_pref: string;
   max_students: number;
+  availability?: string[];
 }
 
 export interface ScoredMatch {
   mentor: Mentor;
   score: number;
   reasons: string[];
+  firstOverlap?: string;
+}
+
+// Helper to find first overlapping date within 21 days
+function findFirstOverlap(studentAvail?: string[], mentorAvail?: string[]): string | null {
+  if (!studentAvail || !mentorAvail) return null;
+  
+  const now = new Date();
+  const cutoff = new Date(now.getTime() + 21 * 24 * 60 * 60 * 1000); // 21 days from now
+  
+  for (const dateStr of studentAvail) {
+    const date = new Date(dateStr);
+    if (date >= now && date <= cutoff && mentorAvail.includes(dateStr)) {
+      return dateStr;
+    }
+  }
+  return null;
 }
 
 export function calculateMatch(student: Student, mentors: Mentor[]): ScoredMatch[] {
@@ -98,16 +117,19 @@ export function calculateMatch(student: Student, mentors: Mentor[]): ScoredMatch
       reasons.push("Meeting preference match");
     }
 
-    // Mentor capacity bonus (10% weight for experienced mentors)
-    if (mentor.max_students > 1) {
+    // Availability overlap within 21 days (10% weight)
+    const firstOverlap = findFirstOverlap(student.availability, mentor.availability);
+    if (firstOverlap) {
       score += 10;
-      reasons.push(`Experienced mentor (capacity: ${mentor.max_students})`);
+      const date = new Date(firstOverlap);
+      reasons.push(`Available ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`);
     }
 
     return {
       mentor,
       score: Math.round(score),
       reasons,
+      firstOverlap: firstOverlap || undefined,
     };
   });
 
