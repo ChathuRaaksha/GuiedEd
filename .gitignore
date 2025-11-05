@@ -12,6 +12,30 @@ dist
 dist-ssr
 *.local
 
+# Environment variables (SECURITY - DO NOT COMMIT)
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+backend/.env
+backend/.env.*
+!backend/.env.example
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+backend/venv/
+backend/env/
+*.egg-info/
+
+# Temporal
+.temporal/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
